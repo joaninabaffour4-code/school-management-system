@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account | School Management System</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-hover: #1e40af;
+      --secondary: #0f172a;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: var(--secondary);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header a { color: #94a3b8; text-decoration: none; }
+    header a:hover { color: white; }
+    .main-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem 1rem;
+    }
+    .auth-card {
+      background: var(--card);
+      width: 100%;
+      max-width: 500px;
+      padding: 2.5rem 2rem;
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+    }
+    .auth-card h2 {
+      text-align: center;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    .auth-card p.subtitle {
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 1.8rem;
+      font-size: 0.95rem;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .form-group { margin-bottom: 1.1rem; }
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.35rem;
+      color: #334155;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(30,58,138,0.12);
+    }
+    button.btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+    }
+    button.btn-submit:hover { background: var(--primary-hover); }
+    .alert {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 1.2rem;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .alert-error { background: #fee2e2; color: #991b1b; display: block; }
+    .alert-success { background: #dcfce7; color: #166534; display: block; }
+    .footer-links {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .footer-links a { color: var(--primary); text-decoration: none; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <header>
+    <div><strong>🏫 BrightPath Academy</strong></div>
+    <div><a href="/login">Existing User? Log In</a></div>
+  </header>
+
+  <div class="main-wrap">
+    <div class="auth-card">
+      <h2>Create Your Account</h2>
+      <p class="subtitle">Join as a Student or Parent/Guardian</p>
+
+      <div id="alertBox" class="alert"></div>
+
+      <form id="registerForm">
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" placeholder="Ama" required />
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" placeholder="Serwaa" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="username">Username (Unique Identifier)</label>
+          <input type="text" id="username" placeholder="e.g. ama_serwaa" required />
+          <small style="color: var(--muted); font-size: 0.78rem;">Alphanumeric and underscores only (3-30 chars).</small>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address (Verification Required)</label>
+          <input type="email" id="email" placeholder="student@school.edu" required />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" placeholder="+233 24 100 0000" />
+        </div>
+
+        <div class="form-group">
+          <label for="role">Account Role</label>
+          <select id="role" required>
+            <option value="Student">Student</option>
+            <option value="Parent/Guardian">Parent / Guardian</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password (Minimum 8 Characters)</label>
+          <input type="password" id="password" placeholder="••••••••" required minlength="8" />
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn-submit">Register Account</button>
+      </form>
+
+      <div class="footer-links">
+        Already have an account? <a href="/login">Sign In here</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const alertBox = document.getElementById('alertBox');
+    const form = document.getElementById('registerForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alertBox.style.display = 'none';
+
+      const payload = {
+        firstName: document.getElementById('firstName').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
+        username: document.getElementById('username').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        role: document.getElementById('role').value,
+        password: document.getElementById('password').value,
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Registering Account...';
+
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Register Account';
+
+        if (!res.ok) {
+          alertBox.className = 'alert alert-error';
+          alertBox.textContent = data.message || 'Registration failed.';
+          alertBox.style.display = 'block';
+          return;
+        }
+
+        form.reset();
+        alertBox.className = 'alert alert-success';
+        const verifyBtnHtml = data.verificationUrl
+          ? `<div style="margin-top:12px;padding:12px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;text-align:left;">
+              <strong style="color:#166534;">🎓 Demonstration / Quick Verification Link:</strong><br>
+              <span style="font-size:0.85rem;color:#374151;">Click below to verify this email immediately:</span><br>
+              <a href="${data.verificationUrl}" target="_blank" style="display:inline-block;margin-top:8px;padding:8px 14px;background:#15803d;color:#ffffff;border-radius:6px;text-decoration:none;font-weight:600;font-size:0.9rem;">
+                ✅ Verify Email Now
+              </a>
+            </div>`
+          : '';
+
+        alertBox.innerHTML = `<strong>Registration Successful!</strong><br>${data.message}${verifyBtnHtml}<br><br><a href="/login" style="color: #166534; font-weight: bold; text-decoration: underline;">Go to Login Page</a>`;
+        alertBox.style.display = 'block';
+      } catch (err) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Register Account';
+        alertBox.className = 'alert alert-error';
+        alertBox.textContent = 'Network error connecting to the registration server.';
+        alertBox.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

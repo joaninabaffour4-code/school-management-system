@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Dashboard</title>
+  <style>
+    body { font-family: Arial; margin: 0; background: #fdf2f8; }
+    .topbar { background: #9d174d; color: white; padding: 18px 24px; display: flex; justify-content: space-between; }
+    .main { padding: 30px; }
+    .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 8px 18px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid #e5e7eb; padding: 10px; text-align: left; }
+    input, button { padding: 9px 12px; border-radius: 8px; border: 1px solid #d1d5db; margin: 5px 0; }
+    button { background: #9d174d; color: white; border: none; cursor: pointer; }
+    .logout { background: #ef4444; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h2>Bajona's Closet - Customer</h2>
+    <button class="logout" onclick="logout()">Logout</button>
+  </div>
+  <div class="main">
+    <div class="card">
+      <h3>Create Order</h3>
+      <form id="orderForm">
+        <input type="number" id="totalAmount" placeholder="Total Amount" step="0.01" required />
+        <input type="text" id="orderStatus" placeholder="Status (optional)" />
+        <button type="submit">Place Order</button>
+      </form>
+      <div id="orderMessage"></div>
+    </div>
+
+    <div class="card">
+      <h3>My Orders</h3>
+      <button onclick="loadOrders()">Load Orders</button>
+      <div id="ordersArea"></div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+
+    const authHeaders = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+
+    document.getElementById('orderForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        totalAmount: Number(document.getElementById('totalAmount').value),
+        status: document.getElementById('orderStatus').value || 'pending'
+      };
+
+      const res = await fetch('/api/customer/orders', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      document.getElementById('orderMessage').textContent = data.message || 'Order placed';
+      loadOrders();
+    });
+
+    async function loadOrders() {
+      const res = await fetch('/api/customer/orders', { headers: { 'Authorization': 'Bearer ' + token } });
+      const orders = await res.json();
+      document.getElementById('ordersArea').innerHTML = `
+        <table>
+          <thead><tr><th>ID</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            ${orders.map(order => `
+              <tr>
+                <td>${order.id}</td>
+                <td>${order.total_amount}</td>
+                <td>${order.status}</td>
+                <td><button onclick="payOrder(${order.id}, ${order.total_amount})">Pay</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function payOrder(id, total) {
+      const amount = prompt('Enter payment amount', total);
+      if (!amount) return;
+
+      const res = await fetch('/api/customer/orders/' + id + '/pay', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({ amount: Number(amount), paymentMethod: 'cash' })
+      });
+
+      const data = await res.json();
+      alert(data.message || 'Payment complete');
+      loadOrders();
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = '/';
+    }
+  </script>
+</body>
+</html>

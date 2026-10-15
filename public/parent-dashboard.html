@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parent Portal | BrightPath Academy</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --secondary: #0f172a;
+      --accent: #2563eb;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --success: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--secondary); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .container { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
+    .child-selector-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 10px; overflow-x: auto; }
+    .tab-btn { padding: 9px 18px; border-radius: 8px; border: 1px solid transparent; background: white; font-weight: 600; cursor: pointer; color: #475569; font-size: 0.92rem; }
+    .tab-btn.active { background: var(--primary); color: white; }
+    .panel { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.8rem; margin-bottom: 2rem; }
+    .tab-section { display: none; }
+    .tab-section.active { display: block; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
+    th { background: #f8fafc; font-weight: 600; }
+    .btn { padding: 8px 14px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-logout { background: #334155; color: white; border: none; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 0.88rem; }
+    .stat-badge { padding: 4px 10px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div><strong>🏫 BrightPath Academy &bull; Parent / Guardian Portal</strong></div>
+    <div>
+      <span id="parentNavName" style="margin-right: 15px; font-size: 0.9rem; color: #cbd5e1;"></span>
+      <button class="btn-logout" onclick="logout()">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Multi-Child Selector Card -->
+    <div class="child-selector-card">
+      <div>
+        <label style="font-weight: 700; color: var(--primary); font-size: 1.05rem; display: block; margin-bottom: 5px;">
+          👨‍👧 Select Linked Child:
+        </label>
+        <select id="childDropdown" style="padding: 9px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; width: 280px;" onchange="onChildChanged()"></select>
+      </div>
+      <div id="childMetaBadge"></div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('grades')">📊 Official Report Card & Marks</button>
+      <button class="tab-btn" onclick="switchTab('attendance')">📋 Attendance Record</button>
+      <button class="tab-btn" onclick="switchTab('timetable')">🗓️ Class Schedule</button>
+      <button class="tab-btn" onclick="switchTab('notices')">📢 School Notices</button>
+      <button class="tab-btn" onclick="switchTab('security')">🔐 Account Security & 2FA</button>
+    </div>
+
+    <!-- Tab: Grades -->
+    <section id="tab-grades" class="tab-section active">
+      <div class="panel">
+        <h3>Official Academic Results & Report Card</h3>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1.2rem;">
+          Verified and published by academic administration.
+        </p>
+        <div id="childGradesArea"></div>
+      </div>
+    </section>
+
+    <!-- Tab: Attendance -->
+    <section id="tab-attendance" class="tab-section">
+      <div class="panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h3>Attendance History</h3>
+          <div id="attSummary"></div>
+        </div>
+        <div id="childAttendanceArea"></div>
+      </div>
+    </section>
+
+    <!-- Tab: Timetable -->
+    <section id="tab-timetable" class="tab-section">
+      <div class="panel">
+        <h3>Weekly Class Schedule</h3>
+        <div id="childTimetableArea"></div>
+      </div>
+    </section>
+
+    <!-- Tab: Notices -->
+    <section id="tab-notices" class="tab-section">
+      <div class="panel">
+        <h3>Notices for Parents & Guardians</h3>
+        <div id="parentNoticesArea"></div>
+      </div>
+    </section>
+
+    <!-- Tab: Security & 2FA -->
+    <section id="tab-security" class="tab-section">
+      <div class="panel" style="max-width: 500px;">
+        <h3>Parent Account Security (TOTP 2FA)</h3>
+        <div id="parent2faStatus" style="margin: 1rem 0;"></div>
+        <div id="parent2faSetupBox" style="display: none; text-align: center; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem;">
+          <p style="font-weight: 600; margin-bottom: 8px;">Scan with Authenticator App:</p>
+          <div id="parentQrBox" style="margin-bottom: 10px;"></div>
+          <input type="text" id="parentConfirmCode" placeholder="Enter 6-digit code" maxlength="6" style="text-align: center; width: 200px; margin: 0 auto 10px;" />
+          <br />
+          <button class="btn btn-primary" onclick="confirmParent2fa()">Activate 2FA</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('school_token');
+    const user = JSON.parse(localStorage.getItem('school_user') || '{}');
+
+    if (!token || user.role !== 'Parent/Guardian') {
+      window.location.href = '/login';
+    }
+
+    document.getElementById('parentNavName').textContent = `${user.firstName} ${user.lastName}`;
+
+    const authHeaders = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token,
+    };
+
+    let linkedChildren = [];
+
+    function switchTab(id) {
+      document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+      document.getElementById('tab-' + id).classList.add('active');
+      event.target.classList.add('active');
+
+      const currentChildId = document.getElementById('childDropdown').value;
+
+      if (id === 'grades' && currentChildId) loadChildGrades(currentChildId);
+      if (id === 'attendance' && currentChildId) loadChildAttendance(currentChildId);
+      if (id === 'timetable' && currentChildId) loadChildTimetable(currentChildId);
+      if (id === 'notices') loadNotices();
+      if (id === 'security') check2fa();
+    }
+
+    async function loadChildren() {
+      try {
+        const res = await fetch('/api/parent/children', { headers: authHeaders });
+        linkedChildren = await res.json();
+        const select = document.getElementById('childDropdown');
+
+        if (linkedChildren.length === 0) {
+          select.innerHTML = '<option value="">No linked children</option>';
+          document.getElementById('childGradesArea').innerHTML = '<p style="color: var(--muted);">No students are currently linked to your guardian account.</p>';
+          return;
+        }
+
+        select.innerHTML = linkedChildren.map(c => `
+          <option value="${c.student_id}">${c.first_name} ${c.last_name} (${c.class_name || 'Enrolled'})</option>
+        `).join('');
+
+        onChildChanged();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function onChildChanged() {
+      const childId = document.getElementById('childDropdown').value;
+      const child = linkedChildren.find(c => String(c.student_id) === String(childId));
+      if (child) {
+        document.getElementById('childMetaBadge').innerHTML = `
+          <span class="stat-badge" style="background: #e0f2fe; color: #0369a1;">
+            Adm #: ${child.admission_number} &bull; Class: ${child.class_name || 'Assigned'} &bull; Relation: ${child.relationship}
+          </span>
+        `;
+      }
+      loadChildGrades(childId);
+    }
+
+    async function loadChildGrades(studentId) {
+      const res = await fetch(`/api/parent/children/${studentId}/grades`, { headers: authHeaders });
+      const grades = await res.json();
+      const area = document.getElementById('childGradesArea');
+
+      if (grades.length === 0) {
+        area.innerHTML = '<p style="color: var(--muted);">No published examination results available for this student.</p>';
+        return;
+      }
+
+      area.innerHTML = `
+        <table>
+          <thead><tr><th>Subject</th><th>Assessment</th><th>Score</th><th>Grade</th><th>Remarks</th></tr></thead>
+          <tbody>
+            ${grades.map(g => `
+              <tr>
+                <td><strong>${g.subject_name}</strong> (${g.subject_code})</td>
+                <td>${g.assessment_title} (${g.assessment_type})</td>
+                <td><strong>${g.marks_obtained}</strong> / ${g.max_marks}</td>
+                <td><span class="stat-badge" style="background: ${g.grade_letter === 'A' ? '#dcfce7' : '#fef3c7'}; color: ${g.grade_letter === 'A' ? '#166534' : '#92400e'};">${g.grade_letter}</span></td>
+                <td><small>${g.remarks || '-'}</small></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function loadChildAttendance(studentId) {
+      const res = await fetch(`/api/parent/children/${studentId}/attendance`, { headers: authHeaders });
+      const data = await res.json();
+
+      document.getElementById('attSummary').innerHTML = `
+        <span class="stat-badge" style="background: #dcfce7; color: #166534;">
+          Attendance Rate: ${data.stats.percentage}% (${data.stats.present} / ${data.stats.total} days)
+        </span>
+      `;
+
+      const area = document.getElementById('childAttendanceArea');
+      if (data.records.length === 0) {
+        area.innerHTML = '<p style="color: var(--muted);">No attendance records recorded yet.</p>';
+        return;
+      }
+
+      area.innerHTML = `
+        <table>
+          <thead><tr><th>Date</th><th>Class</th><th>Status</th><th>Notes</th></tr></thead>
+          <tbody>
+            ${data.records.map(r => `
+              <tr>
+                <td>${r.date}</td>
+                <td>${r.class_name}</td>
+                <td><span class="stat-badge" style="background: ${r.status === 'present' ? '#dcfce7' : '#fee2e2'}; color: ${r.status === 'present' ? '#166534' : '#991b1b'};">${r.status.toUpperCase()}</span></td>
+                <td><small>${r.notes || '-'}</small></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function loadChildTimetable(studentId) {
+      const res = await fetch(`/api/parent/children/${studentId}/timetables`, { headers: authHeaders });
+      const schedule = await res.json();
+      document.getElementById('childTimetableArea').innerHTML = `
+        <table>
+          <thead><tr><th>Day</th><th>Time</th><th>Subject</th><th>Instructor</th><th>Room</th></tr></thead>
+          <tbody>
+            ${schedule.map(t => `
+              <tr>
+                <td><strong>${t.day_of_week}</strong></td>
+                <td>${t.start_time} - ${t.end_time}</td>
+                <td>${t.subject_name}</td>
+                <td>${t.teacher_name}</td>
+                <td>${t.room || '-'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function loadNotices() {
+      const res = await fetch('/api/parent/announcements', { headers: authHeaders });
+      const notices = await res.json();
+      document.getElementById('parentNoticesArea').innerHTML = notices.map(n => `
+        <div style="border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+          <strong>${n.title}</strong>
+          <p style="margin: 5px 0; color: #334155;">${n.content}</p>
+          <small style="color: var(--muted);">${new Date(n.created_at).toLocaleString()}</small>
+        </div>
+      `).join('');
+    }
+
+    async function check2fa() {
+      const res = await fetch('/api/auth/me', { headers: authHeaders });
+      const me = await res.json();
+      const statusArea = document.getElementById('parent2faStatus');
+      if (me.is2faEnabled) {
+        statusArea.innerHTML = '<div style="background: #dcfce7; color: #166534; padding: 10px; border-radius: 6px;">✅ Two-Factor Authentication is active.</div>';
+      } else {
+        statusArea.innerHTML = `
+          <div style="background: #fef3c7; color: #92400e; padding: 10px; border-radius: 6px; margin-bottom: 10px;">Two-factor authentication is not enabled.</div>
+          <button class="btn btn-primary" onclick="initParent2fa()">Enroll Authenticator</button>
+        `;
+      }
+    }
+
+    async function initParent2fa() {
+      const res = await fetch('/api/auth/2fa/setup', { method: 'POST', headers: authHeaders });
+      const data = await res.json();
+      if (res.ok) {
+        document.getElementById('parent2faSetupBox').style.display = 'block';
+        document.getElementById('parentQrBox').innerHTML = `<img src="${data.qrCode}" style="width: 160px; height: 160px;" />`;
+      }
+    }
+
+    async function confirmParent2fa() {
+      const code = document.getElementById('parentConfirmCode').value.trim();
+      const res = await fetch('/api/auth/2fa/enable', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      alert(data.message);
+      if (res.ok) {
+        document.getElementById('parent2faSetupBox').style.display = 'none';
+        check2fa();
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('school_token');
+      localStorage.removeItem('school_user');
+      window.location.href = '/login';
+    }
+
+    loadChildren();
+  </script>
+</body>
+</html>

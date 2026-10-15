@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Login | School Management System</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-hover: #1e40af;
+      --secondary: #0f172a;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --error: #ef4444;
+      --success: #10b981;
+      --border: #cbd5e1;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: var(--secondary);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header a { color: #94a3b8; text-decoration: none; font-size: 0.95rem; }
+    header a:hover { color: white; }
+    .main-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    .auth-card {
+      background: var(--card);
+      width: 100%;
+      max-width: 440px;
+      padding: 2.5rem 2rem;
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+    }
+    .auth-card h2 {
+      text-align: center;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+      font-size: 1.6rem;
+    }
+    .auth-card p.subtitle {
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 1.8rem;
+      font-size: 0.95rem;
+    }
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.88rem;
+      margin-bottom: 0.4rem;
+      color: #334155;
+    }
+    input {
+      width: 100%;
+      padding: 11px 13px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(30,58,138,0.12);
+    }
+    button.btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+    }
+    button.btn-submit:hover { background: var(--primary-hover); }
+    .alert {
+      padding: 11px 14px;
+      border-radius: 8px;
+      margin-bottom: 1.2rem;
+      font-size: 0.9rem;
+      display: none;
+      line-height: 1.4;
+    }
+    .alert-error { background: #fee2e2; color: #991b1b; display: block; }
+    .alert-success { background: #dcfce7; color: #166534; display: block; }
+    .alert-warning { background: #fef3c7; color: #92400e; display: block; }
+    .auth-links {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .auth-links a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .auth-links a:hover { text-decoration: underline; }
+    .two-factor-section {
+      display: none;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div><strong>🏫 BrightPath Academy</strong></div>
+    <div>
+      <a href="/">← Back to Home</a>
+    </div>
+  </header>
+
+  <div class="main-wrap">
+    <div class="auth-card">
+      <h2>School Portal Login</h2>
+      <p class="subtitle">Enter your credentials to access your dashboard</p>
+
+      <div id="alertBox" class="alert"></div>
+
+      <!-- Main Login Form -->
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Username or Email</label>
+          <input type="text" id="username" placeholder="e.g. teacher1, student1, parent1" required autofocus />
+        </div>
+
+        <div class="form-group" id="pwdGroup">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="••••••••" required />
+        </div>
+
+        <!-- 2FA TOTP Challenge Container (Dynamically Revealed) -->
+        <div id="twoFactorSection" class="two-factor-section">
+          <label for="totpCode">🔐 Enter 6-Digit Authenticator Code</label>
+          <input type="text" id="totpCode" placeholder="123456" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" />
+          <p style="font-size: 0.8rem; color: #1e40af; margin-top: 5px;">
+            Open Google Authenticator or your authenticator app to read your one-time code.
+          </p>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn-submit">Sign In</button>
+      </form>
+
+      <div class="auth-links">
+        <a href="/register">Don't have an account? Register here</a>
+        <a href="/forgot-password">Forgot your password?</a>
+        <a href="/verify-email">Resend email verification link</a>
+        <hr style="border: none; border-top: 1px solid var(--border); margin: 6px 0;" />
+        <a href="/admin/login" style="color: #475569; font-weight: 600;">🔒 Are you an Administrator? Click here</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let pendingTempToken = null;
+
+    const alertBox = document.getElementById('alertBox');
+    const loginForm = document.getElementById('loginForm');
+    const pwdGroup = document.getElementById('pwdGroup');
+    const twoFactorSection = document.getElementById('twoFactorSection');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function showAlert(msg, type = 'error') {
+      alertBox.textContent = msg;
+      alertBox.className = 'alert alert-' + type;
+      alertBox.style.display = 'block';
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alertBox.style.display = 'none';
+
+      // If we are currently in 2FA verification step
+      if (pendingTempToken) {
+        const code = document.getElementById('totpCode').value.trim();
+        if (!code || code.length !== 6) {
+          return showAlert('Please enter a valid 6-digit code from your authenticator app.');
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Verifying Code...';
+
+        try {
+          const res = await fetch('/api/auth/2fa/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tempToken: pendingTempToken, code }),
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Verify & Log In';
+            return showAlert(data.message || '2FA verification failed.');
+          }
+
+          localStorage.setItem('school_token', data.token);
+          localStorage.setItem('school_user', JSON.stringify(data.user));
+          handleRedirect(data.user.role);
+        } catch (err) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Verify & Log In';
+          showAlert('Network error during 2FA verification.');
+        }
+        return;
+      }
+
+      // First authentication factor: username & password
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Signing in...';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const data = await res.json();
+
+        if (res.status === 403 && data.emailVerificationRequired) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Sign In';
+          return showAlert(data.message + ' Click "Resend email verification link" below if needed.', 'warning');
+        }
+
+        if (!res.ok) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Sign In';
+          return showAlert(data.message || 'Login failed.');
+        }
+
+        // Check if 2FA is required
+        if (data.twoFactorRequired) {
+          pendingTempToken = data.tempToken;
+          pwdGroup.style.display = 'none';
+          twoFactorSection.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Verify 2FA Code';
+          showAlert('Please enter your 6-digit authenticator code to proceed.', 'success');
+          document.getElementById('totpCode').focus();
+          return;
+        }
+
+        // Direct success without 2FA
+        localStorage.setItem('school_token', data.token);
+        localStorage.setItem('school_user', JSON.stringify(data.user));
+        handleRedirect(data.user.role);
+      } catch (err) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign In';
+        showAlert('Unable to connect to the server. Please check your network.');
+      }
+    });
+
+    function handleRedirect(role) {
+      if (role === 'Administrator' || role === 'admin') {
+        window.location.href = '/admin/dashboard';
+      } else if (role === 'Teacher') {
+        window.location.href = '/teacher/dashboard';
+      } else if (role === 'Student') {
+        window.location.href = '/student/dashboard';
+      } else if (role === 'Parent/Guardian') {
+        window.location.href = '/parent/dashboard';
+      } else {
+        window.location.href = '/';
+      }
+    }
+  </script>
+</body>
+</html>

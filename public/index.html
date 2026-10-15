@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>School Management System | BrightPath Academy</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-hover: #1e40af;
+      --secondary: #0f172a;
+      --accent: #2563eb;
+      --background: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--background);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      background: var(--secondary);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .logo {
+      font-size: 1.35rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      background: var(--accent);
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    nav a {
+      color: #cbd5e1;
+      text-decoration: none;
+      margin-left: 20px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: white; }
+    .btn-admin {
+      background: #334155;
+      padding: 8px 16px;
+      border-radius: 8px;
+      color: #f1f5f9 !important;
+      border: 1px solid #475569;
+    }
+    .btn-admin:hover { background: #475569; }
+    .hero {
+      text-align: center;
+      padding: 4.5rem 1.5rem 3rem;
+      background: linear-gradient(180deg, #e2e8f0 0%, #f8fafc 100%);
+    }
+    .hero h1 {
+      font-size: 2.75rem;
+      color: var(--secondary);
+      margin-bottom: 1rem;
+      letter-spacing: -0.5px;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 650px;
+      margin: 0 auto 2rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .portal-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .portal-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+    }
+    .portal-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .portal-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      color: var(--secondary);
+    }
+    .portal-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+    .btn-portal {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      text-decoration: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .btn-portal:hover { background: var(--primary-hover); }
+    .features-section {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      margin-bottom: 3rem;
+    }
+    .features-section h2 {
+      margin-bottom: 1.5rem;
+      color: var(--secondary);
+      text-align: center;
+    }
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .feature-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .feature-item span {
+      background: #dbeafe;
+      color: var(--primary);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      🏫 BrightPath Academy
+      <span class="badge">AWS Cloud Powered</span>
+    </div>
+    <nav>
+      <a href="/login">User Login</a>
+      <a href="/register">Create Account</a>
+      <a href="/admin/login" class="btn-admin">🔒 Admin Portal</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Integrated School Management System</h1>
+    <p>Role-Based Academic Administration with End-to-End Encryption, Mandatory Email Verification, TOTP 2FA, and Automated AWS S3 Backups.</p>
+  </section>
+
+  <div class="container">
+    <div class="grid">
+      <!-- Student Card -->
+      <div class="portal-card">
+        <div>
+          <div class="portal-icon">🎓</div>
+          <h3>Student Portal</h3>
+          <p>View course enrollments, class timetables, attendance history, and official published report cards.</p>
+        </div>
+        <a href="/login" class="btn-portal">Enter Student Portal</a>
+      </div>
+
+      <!-- Teacher Card -->
+      <div class="portal-card">
+        <div>
+          <div class="portal-icon">👩‍🏫</div>
+          <h3>Teacher Portal</h3>
+          <p>Record daily class attendance, enter assessment marks, view timetables, and communicate updates.</p>
+        </div>
+        <a href="/login" class="btn-portal">Enter Teacher Portal</a>
+      </div>
+
+      <!-- Parent Card -->
+      <div class="portal-card">
+        <div>
+          <div class="portal-icon">👨‍👩‍👧</div>
+          <h3>Parent / Guardian</h3>
+          <p>Monitor your linked children's attendance, review official examination results, and access notices.</p>
+        </div>
+        <a href="/login" class="btn-portal">Enter Parent Portal</a>
+      </div>
+
+      <!-- Admin Card -->
+      <div class="portal-card" style="border-top: 4px solid #1e3a8a;">
+        <div>
+          <div class="portal-icon">🛡️</div>
+          <h3>Administrator</h3>
+          <p>Manage users, enrollments, subject assignments, publish grades, and monitor automated AWS S3 backups.</p>
+        </div>
+        <a href="/admin/login" class="btn-portal" style="background: #0f172a;">Secure Admin Login</a>
+      </div>
+    </div>
+
+    <!-- Security & Architecture Highlights -->
+    <div class="features-section">
+      <h2>Academic Security & Cloud Architecture Highlights</h2>
+      <div class="feature-list">
+        <div class="feature-item">
+          <span>1</span>
+          <div>
+            <strong>Unique Username Identification</strong>
+            <p>Log in using user-facing usernames with strict input validation and account isolation.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span>2</span>
+          <div>
+            <strong>Bcrypt Salt & Server Pepper</strong>
+            <p>12-round auto-generated unique salt plus server-side secret pepper prevents offline rainbow-table attacks.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span>3</span>
+          <div>
+            <strong>AES-256-GCM Cryptographic Technique</strong>
+            <p>Authenticated symmetric encryption protects TOTP authenticator secrets at rest in the database.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span>4</span>
+          <div>
+            <strong>Mandatory Email Verification</strong>
+            <p>All accounts must confirm email ownership via single-use cryptographic tokens before accessing dashboards.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span>5</span>
+          <div>
+            <strong>Authoritative RBAC Authorization</strong>
+            <p>Server-side permission enforcement prevents privilege escalation, IDOR leaks, or unauthorized grade tampering.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span>6</span>
+          <div>
+            <strong>Automated AWS S3 Database Backups</strong>
+            <p>Scheduled cron exports, encrypts, and transfers database backups to a private S3 bucket with tested restore recovery.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 BrightPath Academy. Academic Security & Cloud Architecture Project.</p>
+  </footer>
+</body>
+</html>

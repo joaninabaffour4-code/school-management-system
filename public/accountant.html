@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accountant Dashboard</title>
+  <style>
+    body { font-family: Arial; margin: 0; background: #f8fafc; }
+    .topbar { background: #0f172a; color: white; padding: 18px 24px; display: flex; justify-content: space-between; }
+    .main { padding: 30px; }
+    .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 8px 18px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid #e5e7eb; padding: 10px; text-align: left; }
+    button { background: #1d4ed8; color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; }
+    .logout { background: #ef4444; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h2>Bajona's Closet - Accountant</h2>
+    <button class="logout" onclick="logout()">Logout</button>
+  </div>
+  <div class="main">
+    <div class="card">
+      <h3>Finance Summary</h3>
+      <button onclick="loadSummary()">Load Summary</button>
+      <div id="summaryArea"></div>
+    </div>
+
+    <div class="card">
+      <h3>Finance Report</h3>
+      <button onclick="loadReports()">Load Report</button>
+      <div id="reportArea"></div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+
+    const authHeaders = { 'Authorization': 'Bearer ' + token };
+
+    async function loadSummary() {
+      const res = await fetch('/api/accountant/summary', { headers: authHeaders });
+      const summary = await res.json();
+      document.getElementById('summaryArea').innerHTML = `
+        <p>Total Orders: ${summary.total_orders}</p>
+        <p>Total Revenue: ${summary.total_revenue}</p>
+        <p>Completed Revenue: ${summary.completed_revenue}</p>
+      `;
+    }
+
+    async function loadReports() {
+      const res = await fetch('/api/accountant/financial-report', { headers: authHeaders });
+      const report = await res.json();
+      document.getElementById('reportArea').innerHTML = `
+        <table>
+          <thead><tr><th>Order</th><th>Email</th><th>Total</th><th>Status</th><th>Paid</th><th>Payment Status</th></tr></thead>
+          <tbody>
+            ${report.map(item => `
+              <tr>
+                <td>${item.order_id}</td>
+                <td>${item.email}</td>
+                <td>${item.total_amount}</td>
+                <td>${item.status}</td>
+                <td>${item.total_paid}</td>
+                <td>${item.payment_status}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = '/';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <style>
+    body { font-family: Arial; margin: 0; background: #f8fafc; }
+    .topbar { background: #1f2937; color: white; padding: 18px 24px; display: flex; justify-content: space-between; }
+    .main { padding: 30px; }
+    .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 8px 18px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid #e5e7eb; padding: 10px; text-align: left; }
+    input, select, button { padding: 9px 12px; border-radius: 8px; border: 1px solid #d1d5db; margin: 5px 0; }
+    button { background: #7c2d12; color: white; border: none; cursor: pointer; }
+    .logout { background: #ef4444; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h2>Bajona's Closet - Admin</h2>
+    <button class="logout" onclick="logout()">Logout</button>
+  </div>
+  <div class="main">
+    <div class="card">
+      <h3>Create User</h3>
+      <form id="createUserForm">
+        <input type="email" id="newEmail" placeholder="Email" required />
+        <input type="text" id="newFirstName" placeholder="First Name" required />
+        <input type="text" id="newLastName" placeholder="Last Name" required />
+        <input type="password" id="newPassword" placeholder="Password" required />
+        <select id="newRole">
+          <option value="admin">Admin</option>
+          <option value="accountant">Accountant</option>
+          <option value="customer">Customer</option>
+        </select>
+        <button type="submit">Create User</button>
+      </form>
+      <div id="createMessage"></div>
+    </div>
+
+    <div class="card">
+      <h3>Financial Report</h3>
+      <button onclick="loadReports()">Load Report</button>
+      <div id="reportArea"></div>
+    </div>
+
+    <div class="card">
+      <h3>All Users</h3>
+      <button onclick="loadUsers()">Load Users</button>
+      <div id="usersArea"></div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+
+    const authHeaders = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+
+    document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        email: document.getElementById('newEmail').value,
+        firstName: document.getElementById('newFirstName').value,
+        lastName: document.getElementById('newLastName').value,
+        password: document.getElementById('newPassword').value,
+        role: document.getElementById('newRole').value
+      };
+
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      document.getElementById('createMessage').textContent = data.message || 'User created';
+    });
+
+    async function loadUsers() {
+      const res = await fetch('/api/admin/users', { headers: authHeaders });
+      const users = await res.json();
+      document.getElementById('usersArea').innerHTML = `
+        <table>
+          <thead><tr><th>ID</th><th>Email</th><th>Name</th><th>Role</th><th>Action</th></tr></thead>
+          <tbody>
+            ${users.map(user => `
+              <tr>
+                <td>${user.id}</td>
+                <td>${user.email}</td>
+                <td>${user.first_name} ${user.last_name}</td>
+                <td>${user.role}</td>
+                <td><button onclick="deleteUser(${user.id})">Delete</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function deleteUser(id) {
+      const res = await fetch('/api/admin/users/' + id, {
+        method: 'DELETE',
+        headers: authHeaders
+      });
+      const data = await res.json();
+      alert(data.message || 'User deleted');
+      loadUsers();
+    }
+
+    async function loadReports() {
+      const res = await fetch('/api/admin/financial-report', { headers: authHeaders });
+      const report = await res.json();
+      document.getElementById('reportArea').innerHTML = `
+        <table>
+          <thead><tr><th>Order</th><th>Email</th><th>Amount</th><th>Status</th><th>Payment</th><th>Payment Status</th></tr></thead>
+          <tbody>
+            ${report.map(item => `
+              <tr>
+                <td>${item.order_id}</td>
+                <td>${item.email}</td>
+                <td>${item.total_amount}</td>
+                <td>${item.status}</td>
+                <td>${item.payment_amount ?? 0}</td>
+                <td>${item.payment_status ?? 'pending'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = '/';
+    }
+  </script>
+</body>
+</html>

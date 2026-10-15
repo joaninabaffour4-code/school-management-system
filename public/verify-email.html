@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Verification | BrightPath Academy</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #cbd5e1;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: #0f172a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header { background: #0f172a; color: white; padding: 1rem 2rem; }
+    .main-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    .card {
+      background: var(--card);
+      max-width: 460px;
+      width: 100%;
+      padding: 2.5rem 2rem;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    .icon { font-size: 3rem; margin-bottom: 1rem; }
+    h2 { margin-bottom: 0.5rem; color: var(--primary); }
+    p { color: #64748b; margin-bottom: 1.5rem; font-size: 0.95rem; }
+    .btn {
+      display: inline-block;
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+    .resend-box {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: left;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 8px 0 12px;
+    }
+    .alert { padding: 10px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <header><strong>🏫 BrightPath Academy</strong></header>
+
+  <div class="main-wrap">
+    <div class="card">
+      <div id="statusIcon" class="icon">✉️</div>
+      <h2 id="statusTitle">Email Verification</h2>
+      <p id="statusMsg">Checking verification token...</p>
+
+      <div id="actionArea"></div>
+
+      <div class="resend-box">
+        <strong style="font-size: 0.9rem;">Need a new verification link?</strong>
+        <p style="font-size: 0.85rem; margin-bottom: 8px;">Enter your registered email below to receive a fresh token.</p>
+        <div id="resendAlert" style="display: none;"></div>
+        <form id="resendForm">
+          <input type="email" id="resendEmail" placeholder="your.email@school.edu" required />
+          <button type="submit" class="btn" style="background: #334155;">Resend Verification Email</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+
+    const statusIcon = document.getElementById('statusIcon');
+    const statusTitle = document.getElementById('statusTitle');
+    const statusMsg = document.getElementById('statusMsg');
+    const actionArea = document.getElementById('actionArea');
+
+    if (token) {
+      verifyToken(token);
+    } else {
+      statusIcon.textContent = '📬';
+      statusTitle.textContent = 'Verify Your Email';
+      statusMsg.textContent = 'Please click the link sent to your email address, or enter your email below to receive a fresh verification link.';
+    }
+
+    async function verifyToken(tok) {
+      try {
+        const res = await fetch(`/api/auth/verify-email?token=${encodeURIComponent(tok)}`);
+        const data = await res.json();
+
+        if (res.ok) {
+          statusIcon.textContent = '✅';
+          statusTitle.textContent = 'Email Verified!';
+          statusMsg.textContent = data.message;
+          actionArea.innerHTML = '<a href="/login" class="btn">Proceed to Sign In</a>';
+        } else {
+          statusIcon.textContent = '⚠️';
+          statusTitle.textContent = 'Verification Failed';
+          statusMsg.textContent = data.message || 'The verification link is invalid or has expired.';
+        }
+      } catch (err) {
+        statusIcon.textContent = '❌';
+        statusTitle.textContent = 'Connection Error';
+        statusMsg.textContent = 'Unable to reach the server to verify your email token.';
+      }
+    }
+
+    document.getElementById('resendForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('resendEmail').value.trim();
+      const resendAlert = document.getElementById('resendAlert');
+
+      try {
+        const res = await fetch('/api/auth/resend-verification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+
+        resendAlert.style.display = 'block';
+        resendAlert.className = res.ok ? 'alert' : 'alert';
+        resendAlert.style.background = res.ok ? '#dcfce7' : '#fee2e2';
+        resendAlert.style.color = res.ok ? '#166534' : '#991b1b';
+        resendAlert.textContent = data.message;
+      } catch (err) {
+        resendAlert.style.display = 'block';
+        resendAlert.style.background = '#fee2e2';
+        resendAlert.style.color = '#991b1b';
+        resendAlert.textContent = 'Failed to request verification email.';
+      }
+    });
+  </script>
+</body>
+</html>

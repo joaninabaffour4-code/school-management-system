@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher Dashboard | BrightPath Academy</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --secondary: #0f172a;
+      --accent: #2563eb;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+    .sidebar { width: 250px; background: #0f172a; color: #cbd5e1; display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { padding: 1.5rem; border-bottom: 1px solid #1e293b; color: white; font-weight: 700; font-size: 1.15rem; }
+    .nav-links { list-style: none; padding: 1rem 0; flex: 1; }
+    .nav-links a { display: block; padding: 12px 1.5rem; color: #94a3b8; text-decoration: none; font-weight: 500; font-size: 0.95rem; }
+    .nav-links a:hover, .nav-links a.active { color: white; background: #1e293b; border-left: 4px solid var(--accent); }
+    .content-wrap { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+    .topbar { background: white; padding: 1rem 2rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .main-body { padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+    .panel { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.8rem; margin-bottom: 2rem; }
+    .tab-section { display: none; }
+    .tab-section.active { display: block; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
+    th { background: #f8fafc; font-weight: 600; }
+    .btn { padding: 8px 14px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-logout { background: #334155; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px; }
+    input, select { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.92rem; }
+    .alert { padding: 10px; border-radius: 8px; margin-bottom: 1rem; display: none; }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">👩‍🏫 Teacher Portal</div>
+    <ul class="nav-links">
+      <li><a href="#classes" class="active" onclick="showTab('classes')">📚 Assigned Classes</a></li>
+      <li><a href="#attendance" onclick="showTab('attendance')">📋 Class Attendance</a></li>
+      <li><a href="#assessments" onclick="showTab('assessments')">📝 Assessments & Marks</a></li>
+      <li><a href="#timetables" onclick="showTab('timetables')">🗓️ My Schedule</a></li>
+      <li><a href="#announcements" onclick="showTab('announcements')">📢 School Notices</a></li>
+      <li><a href="#security" onclick="showTab('security')">🔐 Security & 2FA</a></li>
+    </ul>
+    <div style="padding: 1.2rem; border-top: 1px solid #1e293b;">
+      <div id="teacherBadge" style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 8px;"></div>
+      <button class="btn-logout" style="width: 100%;" onclick="logout()">Sign Out</button>
+    </div>
+  </aside>
+
+  <div class="content-wrap">
+    <div class="topbar">
+      <h2>Teacher Workspace</h2>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="main-body">
+      <div id="alertBox" class="alert"></div>
+
+      <!-- Tab: Assigned Classes -->
+      <section id="tab-classes" class="tab-section active">
+        <div class="panel">
+          <h3>My Assigned Classes & Subjects</h3>
+          <p style="color: var(--muted); margin-bottom: 1rem;">Classes and subjects you are officially assigned to teach this academic year.</p>
+          <div id="classesArea"></div>
+        </div>
+      </section>
+
+      <!-- Tab: Attendance -->
+      <section id="tab-attendance" class="tab-section">
+        <div class="panel">
+          <h3>Record Class Attendance</h3>
+          <p style="color: var(--muted); margin-bottom: 1rem;">Select your assigned class and date to record or update attendance.</p>
+          <div class="form-grid">
+            <div>
+              <label style="font-size: 0.85rem; font-weight: 600;">Class:</label>
+              <select id="attClassSelect" onchange="loadStudentsForAttendance()"></select>
+            </div>
+            <div>
+              <label style="font-size: 0.85rem; font-weight: 600;">Date:</label>
+              <input type="date" id="attDate" value="${new Date().toISOString().split('T')[0]}" onchange="loadStudentsForAttendance()" />
+            </div>
+          </div>
+          <div id="studentsAttendanceList" style="margin-top: 1.5rem;"></div>
+          <button id="saveAttendanceBtn" class="btn btn-primary" style="margin-top: 1rem; display: none;" onclick="saveAttendance()">Save Attendance Record</button>
+        </div>
+      </section>
+
+      <!-- Tab: Assessments & Marks -->
+      <section id="tab-assessments" class="tab-section">
+        <div class="panel">
+          <h3>Create Assessment</h3>
+          <form id="createAssessForm">
+            <div class="form-grid">
+              <select id="assessClassSelect" required></select>
+              <select id="assessSubjectSelect" required></select>
+              <input type="text" id="assessTitle" placeholder="Title (e.g. Science Quiz 2)" required />
+              <select id="assessType">
+                <option value="quiz">Quiz</option>
+                <option value="homework">Homework</option>
+                <option value="midterm">Midterm Exam</option>
+                <option value="final_exam">Final Exam</option>
+              </select>
+              <input type="number" id="assessMax" placeholder="Max Marks (e.g. 100)" value="100" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Create Assessment</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h3>Enter Student Marks</h3>
+          <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem;">
+            Marks submitted are submitted for administrator review before official publication.
+          </p>
+          <div class="form-grid">
+            <select id="enterMarksClassSelect" onchange="loadStudentsForMarks()"></select>
+            <input type="number" id="enterMarksAssessId" placeholder="Assessment ID" required />
+          </div>
+          <div id="studentsMarksList"></div>
+          <button id="saveMarksBtn" class="btn btn-success" style="margin-top: 1rem; display: none;" onclick="saveMarks()">Submit Marks for Review</button>
+        </div>
+      </section>
+
+      <!-- Tab: Timetables -->
+      <section id="tab-timetables" class="tab-section">
+        <div class="panel">
+          <h3>My Weekly Teaching Schedule</h3>
+          <div id="timetableArea"></div>
+        </div>
+      </section>
+
+      <!-- Tab: Announcements -->
+      <section id="tab-announcements" class="tab-section">
+        <div class="panel">
+          <h3>Faculty & School Notices</h3>
+          <div id="announcementsArea"></div>
+        </div>
+      </section>
+
+      <!-- Tab: Security & 2FA -->
+      <section id="tab-security" class="tab-section">
+        <div class="panel" style="max-width: 500px;">
+          <h3>Teacher Account Security (TOTP 2FA)</h3>
+          <div id="teacher2faStatus" style="margin: 1rem 0;"></div>
+          <div id="teacher2faSetupBox" style="display: none; text-align: center; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem;">
+            <p style="font-weight: 600; margin-bottom: 8px;">Scan with Google Authenticator:</p>
+            <div id="teacherQrBox" style="margin-bottom: 10px;"></div>
+            <input type="text" id="teacherConfirmCode" placeholder="Enter 6-digit code" maxlength="6" style="text-align: center; width: 200px; margin: 0 auto 10px;" />
+            <br />
+            <button class="btn btn-success" onclick="confirmTeacher2fa()">Enable 2FA</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('school_token');
+    const user = JSON.parse(localStorage.getItem('school_user') || '{}');
+
+    if (!token || user.role !== 'Teacher') {
+      window.location.href = '/login';
+    }
+
+    document.getElementById('teacherBadge').textContent = `${user.firstName} ${user.lastName} (${user.username})`;
+    document.getElementById('attDate').value = new Date().toISOString().split('T')[0];
+
+    const authHeaders = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token,
+    };
+
+    function notify(msg, type = 'success') {
+      const box = document.getElementById('alertBox');
+      box.textContent = msg;
+      box.style.display = 'block';
+      box.style.background = type === 'success' ? '#dcfce7' : '#fee2e2';
+      box.style.color = type === 'success' ? '#166534' : '#991b1b';
+      setTimeout(() => box.style.display = 'none', 5000);
+    }
+
+    function showTab(id) {
+      document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-links a').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + id).classList.add('active');
+      document.querySelector(`.nav-links a[href="#${id}"]`).classList.add('active');
+
+      if (id === 'classes') loadClasses();
+      if (id === 'attendance') prepareAttendanceTab();
+      if (id === 'assessments') prepareAssessmentsTab();
+      if (id === 'timetables') loadTimetable();
+      if (id === 'announcements') loadAnnouncements();
+      if (id === 'security') check2fa();
+    }
+
+    let assignedClassesCache = [];
+
+    async function loadClasses() {
+      const res = await fetch('/api/teacher/classes', { headers: authHeaders });
+      assignedClassesCache = await res.json();
+      document.getElementById('classesArea').innerHTML = `
+        <table>
+          <thead><tr><th>Class</th><th>Grade</th><th>Subject</th><th>Code</th></tr></thead>
+          <tbody>
+            ${assignedClassesCache.map(c => `
+              <tr>
+                <td><strong>${c.class_name}</strong></td>
+                <td>Grade ${c.grade_level}</td>
+                <td>${c.subject_name}</td>
+                <td><code>${c.subject_code}</code></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function prepareAttendanceTab() {
+      if (assignedClassesCache.length === 0) await loadClasses();
+      const uniqueClasses = [...new Map(assignedClassesCache.map(item => [item.class_id, item])).values()];
+      const select = document.getElementById('attClassSelect');
+      select.innerHTML = uniqueClasses.map(c => `<option value="${c.class_id}">${c.class_name}</option>`).join('');
+      loadStudentsForAttendance();
+    }
+
+    async function loadStudentsForAttendance() {
+      const classId = document.getElementById('attClassSelect').value;
+      if (!classId) return;
+
+      const res = await fetch(`/api/teacher/classes/${classId}/students`, { headers: authHeaders });
+      const students = await res.json();
+
+      const area = document.getElementById('studentsAttendanceList');
+      if (students.length === 0) {
+        area.innerHTML = '<p style="color: var(--muted);">No students currently enrolled in this class.</p>';
+        document.getElementById('saveAttendanceBtn').style.display = 'none';
+        return;
+      }
+
+      area.innerHTML = `
+        <table>
+          <thead><tr><th>Admission #</th><th>Student Name</th><th>Status</th><th>Notes</th></tr></thead>
+          <tbody>
+            ${students.map(s => `
+              <tr class="att-row" data-id="${s.student_id}">
+                <td><code>${s.admission_number}</code></td>
+                <td><strong>${s.first_name} ${s.last_name}</strong></td>
+                <td>
+                  <select class="att-status" style="width: 140px;">
+                    <option value="present">Present</option>
+                    <option value="absent">Absent</option>
+                    <option value="late">Late</option>
+                    <option value="excused">Excused</option>
+                  </select>
+                </td>
+                <td><input type="text" class="att-note" placeholder="Optional remark" /></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      document.getElementById('saveAttendanceBtn').style.display = 'inline-block';
+    }
+
+    async function saveAttendance() {
+      const classId = document.getElementById('attClassSelect').value;
+      const date = document.getElementById('attDate').value;
+      const rows = document.querySelectorAll('.att-row');
+      const records = [];
+
+      rows.forEach(r => {
+        records.push({
+          studentId: r.getAttribute('data-id'),
+          status: r.querySelector('.att-status').value,
+          notes: r.querySelector('.att-note').value,
+        });
+      });
+
+      const res = await fetch('/api/teacher/attendance', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({ classId, date, records }),
+      });
+      const data = await res.json();
+      notify(data.message, res.ok ? 'success' : 'error');
+    }
+
+    async function prepareAssessmentsTab() {
+      if (assignedClassesCache.length === 0) await loadClasses();
+      const classSelect = document.getElementById('assessClassSelect');
+      const subjectSelect = document.getElementById('assessSubjectSelect');
+      const enterClassSelect = document.getElementById('enterMarksClassSelect');
+
+      const uniqueClasses = [...new Map(assignedClassesCache.map(item => [item.class_id, item])).values()];
+      classSelect.innerHTML = uniqueClasses.map(c => `<option value="${c.class_id}">${c.class_name}</option>`).join('');
+      enterClassSelect.innerHTML = classSelect.innerHTML;
+
+      const uniqueSubjects = [...new Map(assignedClassesCache.map(item => [item.subject_id, item])).values()];
+      subjectSelect.innerHTML = uniqueSubjects.map(s => `<option value="${s.subject_id}">${s.subject_name}</option>`).join('');
+
+      loadStudentsForMarks();
+    }
+
+    document.getElementById('createAssessForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/teacher/assessments', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          classId: document.getElementById('assessClassSelect').value,
+          subjectId: document.getElementById('assessSubjectSelect').value,
+          title: document.getElementById('assessTitle').value,
+          type: document.getElementById('assessType').value,
+          maxMarks: document.getElementById('assessMax').value,
+        }),
+      });
+      const data = await res.json();
+      notify(data.message + (data.assessmentId ? ` (ID: ${data.assessmentId})` : ''), res.ok ? 'success' : 'error');
+      if (res.ok) document.getElementById('createAssessForm').reset();
+    });
+
+    async function loadStudentsForMarks() {
+      const classId = document.getElementById('enterMarksClassSelect').value;
+      if (!classId) return;
+
+      const res = await fetch(`/api/teacher/classes/${classId}/students`, { headers: authHeaders });
+      const students = await res.json();
+
+      const area = document.getElementById('studentsMarksList');
+      if (students.length === 0) {
+        area.innerHTML = '<p style="color: var(--muted);">No students in class.</p>';
+        document.getElementById('saveMarksBtn').style.display = 'none';
+        return;
+      }
+
+      area.innerHTML = `
+        <table>
+          <thead><tr><th>Admission #</th><th>Student Name</th><th>Marks Obtained</th><th>Remarks</th></tr></thead>
+          <tbody>
+            ${students.map(s => `
+              <tr class="mark-row" data-id="${s.student_id}">
+                <td><code>${s.admission_number}</code></td>
+                <td><strong>${s.first_name} ${s.last_name}</strong></td>
+                <td><input type="number" step="0.5" class="mark-val" placeholder="Marks" required style="width: 120px;" /></td>
+                <td><input type="text" class="mark-remark" placeholder="e.g. Excellent progress" /></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      document.getElementById('saveMarksBtn').style.display = 'inline-block';
+    }
+
+    async function saveMarks() {
+      const assessmentId = document.getElementById('enterMarksAssessId').value;
+      if (!assessmentId) return notify('Please specify Assessment ID', 'error');
+
+      const rows = document.querySelectorAll('.mark-row');
+      const marks = [];
+
+      rows.forEach(r => {
+        const val = r.querySelector('.mark-val').value;
+        if (val !== '') {
+          marks.push({
+            studentId: r.getAttribute('data-id'),
+            marksObtained: val,
+            remarks: r.querySelector('.mark-remark').value,
+          });
+        }
+      });
+
+      if (marks.length === 0) return notify('Please enter marks for at least one student.', 'error');
+
+      const res = await fetch('/api/teacher/grades', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({ assessmentId, marks }),
+      });
+      const data = await res.json();
+      notify(data.message, res.ok ? 'success' : 'error');
+    }
+
+    async function loadTimetable() {
+      const res = await fetch('/api/teacher/timetables', { headers: authHeaders });
+      const schedule = await res.json();
+      document.getElementById('timetableArea').innerHTML = `
+        <table>
+          <thead><tr><th>Day</th><th>Time</th><th>Class</th><th>Subject</th><th>Room</th></tr></thead>
+          <tbody>
+            ${schedule.map(t => `
+              <tr>
+                <td><strong>${t.day_of_week}</strong></td>
+                <td>${t.start_time} - ${t.end_time}</td>
+                <td>${t.class_name}</td>
+                <td>${t.subject_name}</td>
+                <td>${t.room || '-'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function loadAnnouncements() {
+      const res = await fetch('/api/teacher/announcements', { headers: authHeaders });
+      const list = await res.json();
+      document.getElementById('announcementsArea').innerHTML = list.map(a => `
+        <div style="border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+          <strong>${a.title}</strong>
+          <p style="margin: 4px 0; color: #334155;">${a.content}</p>
+          <small style="color: var(--muted);">${new Date(a.created_at).toLocaleString()}</small>
+        </div>
+      `).join('');
+    }
+
+    async function check2fa() {
+      const res = await fetch('/api/auth/me', { headers: authHeaders });
+      const me = await res.json();
+      const statusArea = document.getElementById('teacher2faStatus');
+      if (me.is2faEnabled) {
+        statusArea.innerHTML = '<div style="background: #dcfce7; color: #166534; padding: 10px; border-radius: 6px;">✅ 2FA is active.</div>';
+      } else {
+        statusArea.innerHTML = `
+          <div style="background: #fef3c7; color: #92400e; padding: 10px; border-radius: 6px; margin-bottom: 10px;">2FA is not enabled.</div>
+          <button class="btn btn-primary" onclick="initTeacher2fa()">Setup Authenticator App</button>
+        `;
+      }
+    }
+
+    async function initTeacher2fa() {
+      const res = await fetch('/api/auth/2fa/setup', { method: 'POST', headers: authHeaders });
+      const data = await res.json();
+      if (res.ok) {
+        document.getElementById('teacher2faSetupBox').style.display = 'block';
+        document.getElementById('teacherQrBox').innerHTML = `<img src="${data.qrCode}" style="width: 160px; height: 160px;" />`;
+      }
+    }
+
+    async function confirmTeacher2fa() {
+      const code = document.getElementById('teacherConfirmCode').value.trim();
+      const res = await fetch('/api/auth/2fa/enable', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      notify(data.message, res.ok ? 'success' : 'error');
+      if (res.ok) {
+        document.getElementById('teacher2faSetupBox').style.display = 'none';
+        check2fa();
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('school_token');
+      localStorage.removeItem('school_user');
+      window.location.href = '/login';
+    }
+
+    loadClasses();
+  </script>
+</body>
+</html>

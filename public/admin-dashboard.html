@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Administrator Dashboard | BrightPath Academy</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --secondary: #0f172a;
+      --accent: #2563eb;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--secondary);
+      color: #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #1e293b;
+      color: white;
+      font-weight: 700;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-links {
+      list-style: none;
+      padding: 1rem 0;
+      flex: 1;
+    }
+    .nav-links li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 1.5rem;
+      color: #94a3b8;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+    .nav-links li a:hover, .nav-links li a.active {
+      color: white;
+      background: #1e293b;
+      border-left: 4px solid var(--accent);
+    }
+    .sidebar-footer {
+      padding: 1.2rem;
+      border-top: 1px solid #1e293b;
+    }
+    .btn-logout {
+      width: 100%;
+      background: #334155;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-logout:hover { background: #475569; }
+    /* Content Area */
+    .content-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .topbar {
+      background: white;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .main-body {
+      padding: 2rem;
+      max-width: 1300px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem 1.5rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .stat-label { font-size: 0.85rem; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+    .stat-val { font-size: 1.8rem; font-weight: 700; color: var(--secondary); margin-top: 4px; }
+    /* Sections / Panels */
+    .panel {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.8rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+    .panel h3 { font-size: 1.25rem; color: var(--secondary); }
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.92rem; }
+    th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+    tr:hover { background: #f8fafc; }
+    .badge-status {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .badge-active { background: #dcfce7; color: #166534; }
+    .badge-suspended { background: #fee2e2; color: #991b1b; }
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-dark { background: #0f172a; color: white; }
+    /* Forms */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.92rem;
+    }
+    .alert-banner {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 1.2rem;
+      display: none;
+    }
+    .tab-section { display: none; }
+    .tab-section.active { display: block; }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      🛡️ Admin Control
+    </div>
+    <ul class="nav-links">
+      <li><a href="#overview" class="active" onclick="showTab('overview')">📊 Overview & Stats</a></li>
+      <li><a href="#users" onclick="showTab('users')">👥 User Accounts</a></li>
+      <li><a href="#academics" onclick="showTab('academics')">🏫 Classes & Subjects</a></li>
+      <li><a href="#grades" onclick="showTab('grades')">📝 Review & Publish Marks</a></li>
+      <li><a href="#backups" onclick="showTab('backups')">☁️ AWS S3 Backups</a></li>
+      <li><a href="#announcements" onclick="showTab('announcements')">📢 School Announcements</a></li>
+      <li><a href="#audit" onclick="showTab('audit')">📜 System Audit Logs</a></li>
+      <li><a href="#security" onclick="showTab('security')">🔐 My 2FA Security</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <div id="adminUserBadge" style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px;"></div>
+      <button class="btn-logout" onclick="logout()">Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- Main Wrap -->
+  <div class="content-wrap">
+    <div class="topbar">
+      <div>
+        <h2 style="font-size: 1.35rem; color: var(--secondary);">Administrator Operations Dashboard</h2>
+      </div>
+      <div>
+        <span class="badge-status badge-active">Authoritative Role</span>
+      </div>
+    </div>
+
+    <div class="main-body">
+      <div id="globalMsg" class="alert-banner"></div>
+
+      <!-- Tab: Overview -->
+      <section id="tab-overview" class="tab-section active">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Users</div>
+            <div id="statUsers" class="stat-val">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Faculty / Teachers</div>
+            <div id="statTeachers" class="stat-val">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Enrolled Students</div>
+            <div id="statStudents" class="stat-val">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Parents / Guardians</div>
+            <div id="statGuardians" class="stat-val">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">School Classes</div>
+            <div id="statClasses" class="stat-val">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Last Automated Backup</div>
+            <div id="statBackup" class="stat-val" style="font-size: 1rem; color: #166534; font-weight: 600; margin-top: 8px;">-</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Quick Administration Controls</h3>
+          <p style="color: var(--muted); margin-bottom: 1.2rem;">Perform critical school operations with authoritative backend security verification.</p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn-sm btn-primary" style="padding: 10px 16px;" onclick="showTab('users')">Manage Users</button>
+            <button class="btn-sm btn-success" style="padding: 10px 16px;" onclick="showTab('grades')">Review & Publish Grades</button>
+            <button class="btn-sm btn-dark" style="padding: 10px 16px;" onclick="showTab('backups')">Run AWS S3 Backup</button>
+            <button class="btn-sm btn-warning" style="padding: 10px 16px;" onclick="showTab('announcements')">Post Announcement</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab: Users -->
+      <section id="tab-users" class="tab-section">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Provision New User Account</h3>
+          </div>
+          <form id="createUserForm">
+            <div class="form-grid">
+              <input type="text" id="newUsername" placeholder="Username (unique)" required />
+              <input type="email" id="newEmail" placeholder="Email Address" required />
+              <input type="text" id="newFirst" placeholder="First Name" required />
+              <input type="text" id="newLast" placeholder="Last Name" required />
+              <input type="tel" id="newPhone" placeholder="Phone Number" />
+              <select id="newRole" required>
+                <option value="Teacher">Teacher</option>
+                <option value="Student">Student</option>
+                <option value="Parent/Guardian">Parent/Guardian</option>
+                <option value="Administrator">Administrator</option>
+              </select>
+              <input type="password" id="newPassword" placeholder="Initial Password (min 8 chars)" required minlength="8" />
+            </div>
+            <button type="submit" class="btn-sm btn-primary" style="padding: 10px 18px;">Create User</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Link Parent/Guardian to Student</h3>
+          </div>
+          <form id="linkGuardianForm">
+            <div class="form-grid">
+              <input type="number" id="linkGuardianId" placeholder="Guardian ID" required />
+              <input type="number" id="linkStudentId" placeholder="Student ID" required />
+              <input type="text" id="linkRelation" placeholder="Relationship (e.g. Mother, Father)" required />
+            </div>
+            <button type="submit" class="btn-sm btn-dark">Establish Authorized Link</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3>All User Accounts</h3>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="userSearch" placeholder="Search accounts..." style="width: 200px;" oninput="loadUsers()" />
+              <select id="userRoleFilter" style="width: 160px;" onchange="loadUsers()">
+                <option value="">All Roles</option>
+                <option value="Administrator">Administrator</option>
+                <option value="Teacher">Teacher</option>
+                <option value="Student">Student</option>
+                <option value="Parent/Guardian">Parent/Guardian</option>
+              </select>
+            </div>
+          </div>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Username</th>
+                  <th>Full Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Email Verified</th>
+                  <th>2FA</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab: Academics -->
+      <section id="tab-academics" class="tab-section">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Create Class</h3>
+          </div>
+          <form id="createClassForm">
+            <div class="form-grid">
+              <input type="text" id="className" placeholder="Class Name (e.g. Grade 10A)" required />
+              <input type="text" id="classGrade" placeholder="Grade Level (e.g. 10)" required />
+              <input type="number" id="classCapacity" placeholder="Capacity (e.g. 35)" value="35" />
+            </div>
+            <button type="submit" class="btn-sm btn-primary">Add Class</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Enroll Student into Class</h3>
+          </div>
+          <form id="enrollForm">
+            <div class="form-grid">
+              <input type="number" id="enrollStudentId" placeholder="Student ID" required />
+              <input type="number" id="enrollClassId" placeholder="Class ID" required />
+            </div>
+            <button type="submit" class="btn-sm btn-success">Enroll Student</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Assign Teacher to Subject & Class</h3>
+          </div>
+          <form id="assignTeacherForm">
+            <div class="form-grid">
+              <input type="number" id="assignTeacherId" placeholder="Teacher ID" required />
+              <input type="number" id="assignSubjectId" placeholder="Subject ID" required />
+              <input type="number" id="assignClassId" placeholder="Class ID" required />
+            </div>
+            <button type="submit" class="btn-sm btn-dark">Assign Teacher</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h3>Active Classes</h3>
+          <div id="classesListArea"></div>
+        </div>
+      </section>
+
+      <!-- Tab: Grades Review -->
+      <section id="tab-grades" class="tab-section">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Review Teacher Submitted Grades</h3>
+            <button class="btn-sm btn-success" style="padding: 8px 16px;" onclick="publishAllGrades()">Approve & Publish All Grades</button>
+          </div>
+          <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem;">
+            Grades entered by faculty are held in draft status until approved by the administrator, ensuring academic integrity.
+          </p>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Student</th>
+                  <th>Admission #</th>
+                  <th>Class</th>
+                  <th>Subject</th>
+                  <th>Assessment</th>
+                  <th>Marks</th>
+                  <th>Grade</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="gradesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab: Backups -->
+      <section id="tab-backups" class="tab-section">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Automated AWS S3 Database Backups</h3>
+              <p style="color: var(--muted); font-size: 0.88rem; margin-top: 4px;">
+                Scheduled daily at 02:00 UTC with AES-256-GCM encryption, SHA-256 verification, and automatic retention.
+              </p>
+            </div>
+            <button class="btn-sm btn-dark" style="padding: 10px 18px;" onclick="triggerBackup()">🚀 Trigger Immediate AWS Backup</button>
+          </div>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Filename</th>
+                  <th>Destination</th>
+                  <th>Status</th>
+                  <th>Size</th>
+                  <th>SHA-256 Checksum</th>
+                  <th>Timestamp</th>
+                </tr>
+              </thead>
+              <tbody id="backupsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab: Announcements -->
+      <section id="tab-announcements" class="tab-section">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Broadcast Official Announcement</h3>
+          </div>
+          <form id="announcementForm">
+            <div style="margin-bottom: 12px;">
+              <input type="text" id="annTitle" placeholder="Announcement Title" required />
+            </div>
+            <div style="margin-bottom: 12px;">
+              <textarea id="annContent" rows="4" placeholder="Announcement Message..." required></textarea>
+            </div>
+            <div style="margin-bottom: 15px;">
+              <label style="font-size: 0.85rem; font-weight: 600; color: var(--muted);">Target Audience:</label>
+              <select id="annTarget" style="width: 220px; margin-top: 4px;">
+                <option value="all">All School Groups</option>
+                <option value="Teacher">Teachers Only</option>
+                <option value="Student">Students Only</option>
+                <option value="Parent/Guardian">Parents Only</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-sm btn-primary">Broadcast Notice</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h3>Published Announcements</h3>
+          <div id="announcementsList"></div>
+        </div>
+      </section>
+
+      <!-- Tab: Audit Logs -->
+      <section id="tab-audit" class="tab-section">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Security & Operational Audit Trail</h3>
+            <button class="btn-sm btn-primary" onclick="loadAuditLogs()">Refresh Logs</button>
+          </div>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Resource</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="auditTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab: Security & 2FA -->
+      <section id="tab-security" class="tab-section">
+        <div class="panel" style="max-width: 600px;">
+          <h3>Administrator Two-Factor Authentication (TOTP)</h3>
+          <p style="color: var(--muted); margin: 8px 0 16px;">
+            Enforce multi-factor authentication with Google Authenticator or Microsoft Authenticator. Authenticator secrets are protected with AES-256-GCM encryption.
+          </p>
+          <div id="mfaStatusArea" style="margin-bottom: 1.2rem;"></div>
+          <div id="mfaSetupContainer" style="display: none; background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; text-align: center;">
+            <p style="font-weight: 600; margin-bottom: 10px;">Scan this QR Code with your Authenticator App:</p>
+            <div id="mfaQrArea" style="margin-bottom: 12px;"></div>
+            <p style="font-size: 0.85rem; color: var(--muted);">Manual Key: <code id="mfaSecretCode"></code></p>
+            <div style="margin: 15px auto; max-width: 260px;">
+              <input type="text" id="confirmTotpCode" placeholder="Enter 6-digit code" maxlength="6" style="text-align: center; font-size: 1.1rem; letter-spacing: 2px;" />
+              <button class="btn-sm btn-success" style="width: 100%; margin-top: 8px; padding: 10px;" onclick="enable2fa()">Confirm & Enable 2FA</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('school_token');
+    const userStr = localStorage.getItem('school_user');
+
+    if (!token || !userStr) {
+      window.location.href = '/admin/login';
+    }
+
+    const currentUser = JSON.parse(userStr);
+    if (currentUser.role !== 'Administrator' && currentUser.role !== 'admin') {
+      window.location.href = '/login';
+    }
+
+    document.getElementById('adminUserBadge').textContent = `Logged in: ${currentUser.username} (${currentUser.role})`;
+
+    const authHeaders = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token,
+    };
+
+    function notify(msg, type = 'success') {
+      const banner = document.getElementById('globalMsg');
+      banner.textContent = msg;
+      banner.style.display = 'block';
+      banner.style.background = type === 'success' ? '#dcfce7' : '#fee2e2';
+      banner.style.color = type === 'success' ? '#166534' : '#991b1b';
+      setTimeout(() => banner.style.display = 'none', 6000);
+    }
+
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-links a').forEach(el => el.classList.remove('active'));
+
+      const target = document.getElementById('tab-' + tabId);
+      if (target) target.classList.add('active');
+
+      const link = document.querySelector(`.nav-links a[href="#${tabId}"]`);
+      if (link) link.classList.add('active');
+
+      if (tabId === 'overview') loadStats();
+      if (tabId === 'users') loadUsers();
+      if (tabId === 'academics') loadClasses();
+      if (tabId === 'grades') loadGrades();
+      if (tabId === 'backups') loadBackups();
+      if (tabId === 'announcements') loadAnnouncements();
+      if (tabId === 'audit') loadAuditLogs();
+      if (tabId === 'security') checkMfaStatus();
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/admin/stats', { headers: authHeaders });
+        const data = await res.json();
+        document.getElementById('statUsers').textContent = data.totalUsers;
+        document.getElementById('statTeachers').textContent = data.totalTeachers;
+        document.getElementById('statStudents').textContent = data.totalStudents;
+        document.getElementById('statGuardians').textContent = data.totalGuardians;
+        document.getElementById('statClasses').textContent = data.totalClasses;
+
+        if (data.lastBackup) {
+          document.getElementById('statBackup').textContent = `${data.lastBackup.filename} (${data.lastBackup.status})`;
+        } else {
+          document.getElementById('statBackup').textContent = 'No backups yet';
+        }
+      } catch (err) {
+        console.error('Stats error:', err);
+      }
+    }
+
+    async function loadUsers() {
+      try {
+        const search = document.getElementById('userSearch').value;
+        const role = document.getElementById('userRoleFilter').value;
+        const url = `/api/admin/users?search=${encodeURIComponent(search)}&role=${encodeURIComponent(role)}`;
+        const res = await fetch(url, { headers: authHeaders });
+        const users = await res.json();
+
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = users.map(u => `
+          <tr>
+            <td>${u.id}</td>
+            <td><strong>${u.username}</strong></td>
+            <td>${u.first_name} ${u.last_name}</td>
+            <td>${u.email}</td>
+            <td><span class="badge-status ${u.role === 'Administrator' ? 'badge-suspended' : 'badge-active'}">${u.role}</span></td>
+            <td>${u.is_email_verified ? '✅ Verified' : '⏳ Pending'}</td>
+            <td>${u.is_2fa_enabled ? '🔐 Yes' : 'No'}</td>
+            <td><span class="badge-status ${u.status === 'active' ? 'badge-active' : 'badge-suspended'}">${u.status}</span></td>
+            <td>
+              ${u.status === 'active'
+                ? `<button class="btn-sm btn-warning" onclick="updateUserStatus(${u.id}, 'suspended')">Suspend</button>`
+                : `<button class="btn-sm btn-success" onclick="updateUserStatus(${u.id}, 'active')">Activate</button>`}
+              <button class="btn-sm btn-danger" onclick="deleteUser(${u.id})">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error('Users error:', err);
+      }
+    }
+
+    async function updateUserStatus(userId, status) {
+      if (!confirm(`Are you sure you want to mark this account as ${status}?`)) return;
+      const res = await fetch(`/api/admin/users/${userId}/status`, {
+        method: 'PATCH',
+        headers: authHeaders,
+        body: JSON.stringify({ status }),
+      });
+      const data = await res.json();
+      notify(data.message, res.ok ? 'success' : 'error');
+      loadUsers();
+    }
+
+    async function deleteUser(userId) {
+      if (!confirm('Are you sure you want to delete this user? This action is permanent.')) return;
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: authHeaders,
+      });
+      const data = await res.json();
+      notify(data.message, res.ok ? 'success' : 'error');
+      loadUsers();
+    }
+
+    document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        username: document.getElementById('newUsername').value.trim(),
+        email: document.getElementById('newEmail').value.trim(),
+        firstName: document.getElementById('newFirst').value.trim(),
+        lastName: document.getElementById('newLast').value.trim(),
+        phone: document.getElementById('newPhone').value.trim(),
+        role: document.getElementById('newRole').value,
+        password: document.getElementById('newPassword').value,
+      };
+
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      notify(data.message, res.ok ? 'success' : 'error');
+      if (res.ok) {
+        document.getElementById('createUserForm').reset();
+        loadUsers();
+      }
+    });
+
+    document.getElementById('linkGuardianForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/admin/guardians/link', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          guardianId: document.getElementById('linkGuardianId').value,
+          studentId: document.getElementById('linkStudentId').value,
+          relationship: document.getElementById('linkRelation').value,
+        }),
+      });
+      const data = await res.json();
+      notify(data.message, res.ok ? 'success' : 'error');
+      if (res.ok) document.getElementById('linkGuardianForm').reset();
+    });
+
+    async function loadClasses() {
+      const res = await fetch('/api/admin/classes', { headers: authHeaders });
+      const classes = await res.json();
+      document.getElementById('classesListArea').innerHTML = `
+        <table>
+          <thead><tr><th>ID</th><th>Name</th><th>Grade Level</th><th>Capacity</th><th>Enrolled Students</th></tr></thead>
+          <tbody>
+            ${classes.map(c => `
+              <tr>
+                <td>${c.id}</td>
+                <td><strong>${c.name}</strong></td>
+                <td>Grade ${c.grade_level}</td>
+                <td>${c.capacity}</td>
+                <td>${c.enrolled_students || 0}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    document.getElementById('createClassForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/admin/classes', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          name: document.getElementById('className').value,
+          gradeLevel: document.getElementById('classGrade').value,
+          capacity: document.getElementById('classCapacity').value,
+        }),
+      });
+      const data = await res.json();
+      notify(data.message, res.ok ? 'success' : 'error');
+      if (res.ok) {
+        document.getElementById('createClassForm').reset();
+        loadClasses();
+      }
+    });
+
+    document.getElementById('enrollForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/admin/enrollments', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          studentId: document.getElementById('enrollStudentId').value,
+          classId: document.getElementById('enrollClassId').value,
+        }),
+      });
+      const data = await res.json();
+      notify(data.message, res.ok ? 'success' : 'error');
+      if (res.ok) document.getElementById('enrollForm').reset();
+    });
+
+    document.getElementById('assignTeacherForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/admin/teachers/assign', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          teacherId: document.getElementById('assignTeacherId').value,
+          subjectId: document.getElementById('assignSubjectId').value,
+          classId: document.getElementById('assignClassId').value,
+        }),
+      });
+      const data = await res.json();
+      notify(data.message, res.ok ? 'success' : 'error');
+      if (res.ok) document.getElementById('assignTeacherForm').reset();
+    });
+
+    async function loadGrades() {
+      const res = await fetch('/api/admin/grades/review', { headers: authHeaders });
+      const grades = await res.json();
+      document.getElementById('gradesTableBody').innerHTML = grades.map(g => `
+        <tr>
+          <td>${g.id}</td>
+          <td>${g.student_name}</td>
+          <td><code>${g.admission_number}</code></td>
+          <td>${g.class_name}</td>
+          <td>${g.subject_name}</td>
+          <td>${g.assessment_title}</td>
+          <td>${g.marks_obtained} / ${g.max_marks}</td>
+          <td><strong>${g.grade_letter}</strong></td>
+          <td>${g.is_published ? '<span class="badge-status badge-active">Published</span>' : '<span class="badge-status badge-suspended">Pending Admin Approval</span>'}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function publishAllGrades() {
+      if (!confirm('Publish all pending grades? Students and parents will be able to view them immediately.')) return;
+      const res = await fetch('/api/admin/grades/publish', {
+        method: 'PATCH',
+        headers: authHeaders,
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      notify(data.message, res.ok ? 'success' : 'error');
+      loadGrades();
+    }
+
+    async function loadBackups() {
+      const res = await fetch('/api/admin/backups', { headers: authHeaders });
+      const backups = await res.json();
+      document.getElementById('backupsTableBody').innerHTML = backups.map(b => `
+        <tr>
+          <td>${b.id}</td>
+          <td><code>${b.filename}</code></td>
+          <td>${b.destination}</td>
+          <td><span class="badge-status ${b.status === 'success' ? 'badge-active' : 'badge-suspended'}">${b.status}</span></td>
+          <td>${(b.size_bytes / 1024).toFixed(1)} KB</td>
+          <td><code style="font-size: 0.75rem;">${b.sha256_checksum ? b.sha256_checksum.substring(0, 16) + '...' : '-'}</code></td>
+          <td>${new Date(b.created_at).toLocaleString()}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function triggerBackup() {
+      notify('Starting AWS S3 backup job...', 'success');
+      try {
+        const res = await fetch('/api/admin/backups/run', {
+          method: 'POST',
+          headers: authHeaders,
+        });
+        const data = await res.json();
+        notify(data.message, res.ok ? 'success' : 'error');
+        loadBackups();
+      } catch (err) {
+        notify('Backup trigger failed.', 'error');
+      }
+    }
+
+    async function loadAnnouncements() {
+      const res = await fetch('/api/admin/announcements', { headers: authHeaders });
+      const list = await res.json();
+      document.getElementById('announcementsList').innerHTML = list.map(a => `
+        <div style="border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <strong>${a.title}</strong>
+            <span class="badge-status badge-active">Target: ${a.target_role}</span>
+          </div>
+          <p style="color: #334155; font-size: 0.92rem;">${a.content}</p>
+          <small style="color: var(--muted);">By: ${a.author || 'Admin'} &bull; ${new Date(a.created_at).toLocaleString()}</small>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('announcementForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/admin/announcements', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          title: document.getElementById('annTitle').value,
+          content: document.getElementById('annContent').value,
+          targetRole: document.getElementById('annTarget').value,
+        }),
+      });
+      const data = await res.json();
+      notify(data.message, res.ok ? 'success' : 'error');
+      if (res.ok) {
+        document.getElementById('announcementForm').reset();
+        loadAnnouncements();
+      }
+    });
+
+    async function loadAuditLogs() {
+      const res = await fetch('/api/admin/audit-logs', { headers: authHeaders });
+      const logs = await res.json();
+      document.getElementById('auditTableBody').innerHTML = logs.map(l => `
+        <tr>
+          <td><small>${new Date(l.created_at).toLocaleString()}</small></td>
+          <td>${l.username ? l.username : 'System'}</td>
+          <td><strong>${l.action}</strong></td>
+          <td>${l.resource_type} ${l.resource_id ? '#' + l.resource_id : ''}</td>
+          <td><small>${l.details || '-'}</small></td>
+        </tr>
+      `).join('');
+    }
+
+    async function checkMfaStatus() {
+      const res = await fetch('/api/auth/me', { headers: authHeaders });
+      const user = await res.json();
+      const area = document.getElementById('mfaStatusArea');
+      if (user.is2faEnabled) {
+        area.innerHTML = `
+          <div style="background: #dcfce7; color: #166534; padding: 12px; border-radius: 8px;">
+            ✅ <strong>Two-Factor Authentication is currently ACTIVE on your administrator account.</strong>
+          </div>
+        `;
+      } else {
+        area.innerHTML = `
+          <div style="background: #fef3c7; color: #92400e; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+            ⚠️ Two-Factor Authentication is not yet enabled on your account.
+          </div>
+          <button class="btn-sm btn-primary" onclick="initiate2faSetup()">Enroll Authenticator 2FA</button>
+        `;
+      }
+    }
+
+    async function initiate2faSetup() {
+      const res = await fetch('/api/auth/2fa/setup', {
+        method: 'POST',
+        headers: authHeaders,
+      });
+      const data = await res.json();
+      if (res.ok) {
+        document.getElementById('mfaSetupContainer').style.display = 'block';
+        document.getElementById('mfaQrArea').innerHTML = `<img src="${data.qrCode}" alt="2FA QR Code" style="width: 180px; height: 180px;" />`;
+        document.getElementById('mfaSecretCode').textContent = data.manualEntrySecret;
+      } else {
+        notify('Failed to initialize 2FA setup.', 'error');
+      }
+    }
+
+    async function enable2fa() {
+      const code = document.getElementById('confirmTotpCode').value.trim();
+      const res = await fetch('/api/auth/2fa/enable', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      notify(data.message, res.ok ? 'success' : 'error');
+      if (res.ok) {
+        document.getElementById('mfaSetupContainer').style.display = 'none';
+        checkMfaStatus();
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('school_token');
+      localStorage.removeItem('school_user');
+      window.location.href = '/admin/login';
+    }
+
+    // Initial load
+    loadStats();
+  </script>
+</body>
+</html>
