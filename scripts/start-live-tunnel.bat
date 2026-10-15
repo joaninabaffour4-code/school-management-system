@@ -8,7 +8,7 @@ echo Press Ctrl+C to stop.
 echo.
 
 :loop
-ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -R brightpath-sms:80:127.0.0.1:3000 serveo.net
+ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=20 -p 443 -R0:127.0.0.1:3000 b@a.pinggy.io
 echo [Tunnel disconnected] Reconnecting in 3 seconds...
 timeout /t 3 /nobreak >nul
 goto loop
