@@ -11,17 +11,11 @@ import { Platform } from 'react-native';
 
 export const LOCAL_WIFI_IP = '172.25.157.111';
 export const PORT = 3000;
+export const PUBLIC_HTTPS_URL = 'https://8a81205a02cf57c6-196-61-37-205.serveousercontent.com';
 
 export function getDefaultServerUrl() {
-  if (Platform.OS === 'web') {
-    return `http://localhost:${PORT}`;
-  }
-  if (Platform.OS === 'android') {
-    // When using physical phone with Expo Go, use local Wi-Fi IP:
-    return `http://${LOCAL_WIFI_IP}:${PORT}`;
-  }
-  // iOS / Default
-  return `http://${LOCAL_WIFI_IP}:${PORT}`;
+  // Use live public HTTPS URL so it works seamlessly from anywhere in the world!
+  return PUBLIC_HTTPS_URL;
 }
 
 let serverUrl = getDefaultServerUrl();

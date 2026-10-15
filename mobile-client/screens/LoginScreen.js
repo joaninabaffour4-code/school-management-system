@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { getServerUrl, setServerUrl, LOCAL_WIFI_IP, PORT } from '../apiConfig';
+import { getServerUrl, setServerUrl, LOCAL_WIFI_IP, PORT, PUBLIC_HTTPS_URL } from '../apiConfig';
 
 export default function LoginScreen({ onLogin, onRegister }) {
   const [identifier, setIdentifier] = useState('admin');
@@ -66,11 +66,14 @@ export default function LoginScreen({ onLogin, onRegister }) {
           autoCorrect={false}
         />
         <View style={styles.presetRow}>
+          <TouchableOpacity onPress={() => { setServerEndpoint(PUBLIC_HTTPS_URL); setServerUrl(PUBLIC_HTTPS_URL); }} style={[styles.presetBtn, { backgroundColor: '#10b981' }]}>
+            <Text style={[styles.presetText, { color: '#fff', fontWeight: 'bold' }]}>🌐 Public Live</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => setPreset(LOCAL_WIFI_IP)} style={styles.presetBtn}>
-            <Text style={styles.presetText}>Wi-Fi ({LOCAL_WIFI_IP})</Text>
+            <Text style={styles.presetText}>Wi-Fi</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setPreset('10.0.2.2')} style={styles.presetBtn}>
-            <Text style={styles.presetText}>Emulator (10.0.2.2)</Text>
+            <Text style={styles.presetText}>Emulator</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setPreset('localhost')} style={styles.presetBtn}>
             <Text style={styles.presetText}>Localhost</Text>
