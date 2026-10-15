@@ -113,4 +113,5 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
   });
 }
 
+export { app, startServer };
 export default app;

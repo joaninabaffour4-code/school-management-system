@@ -1,10 +1,26 @@
 import sqlite3 from 'sqlite3';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const dbPath = path.join(__dirname, '..', '..', 'data', 'bajonas_closet.db');
+
+let defaultDbPath = path.join(__dirname, '..', '..', 'data', 'bajonas_closet.db');
+let dbPath = process.env.DB_FILE || defaultDbPath;
+
+// Support Vercel serverless environment (writable /tmp sandbox)
+if (process.env.VERCEL) {
+  const tmpDbPath = path.join('/tmp', 'bajonas_closet.db');
+  try {
+    if (!fs.existsSync(tmpDbPath) && fs.existsSync(defaultDbPath)) {
+      fs.copyFileSync(defaultDbPath, tmpDbPath);
+    }
+    dbPath = tmpDbPath;
+  } catch (e) {
+    console.warn('[DB] Vercel /tmp copy note:', e.message);
+  }
+}
 
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {

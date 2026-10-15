@@ -1,0 +1,35 @@
+# Render Infrastructure as Code Blueprint
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: school-management-system
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run seed
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PEPPER_KEY
+        value: BajonasClosetPepperKey2026
+      - key: AES_ENCRYPTION_KEY
+        value: 6b8d9c2a1e4f5a3b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b
+      - key: ADMIN_SETUP_SECRET
+        value: AdminProvisioningToken2026!SecureKey
+      - key: EMAIL_SERVICE_MODE
+        value: console
+      - key: AWS_REGION
+        value: us-east-1
+      - key: AWS_S3_BACKUP_BUCKET
+        value: school-management-backups-2026
+      - key: BACKUP_SCHEDULE_CRON
+        value: "0 2 * * *"
+      - key: BACKUP_RETENTION_DAYS
+        value: "30"
