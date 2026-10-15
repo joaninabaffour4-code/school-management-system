@@ -122,13 +122,14 @@ router.post('/register', async (req, res) => {
  */
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const identifier = req.body.username || req.body.email || req.body.identifier;
+    const { password } = req.body;
 
-    if (!username || !password) {
+    if (!identifier || !password) {
       return res.status(400).json({ message: 'Username and password are required.' });
     }
 
-    const cleanIdentifier = String(username).trim().toLowerCase();
+    const cleanIdentifier = String(identifier).trim().toLowerCase();
 
     // Rate limiting to prevent brute-force attacks
     const rateCheck = checkRateLimit(`login:${cleanIdentifier}`, 5, 15 * 60 * 1000);
@@ -193,6 +194,7 @@ router.post('/login', async (req, res) => {
     return res.json({
       message: 'Login successful',
       token,
+      accessToken: token,
       user: {
         id: user.id,
         username: user.username,
@@ -217,13 +219,14 @@ router.post('/login', async (req, res) => {
  */
 router.post('/admin/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const identifier = req.body.username || req.body.email || req.body.identifier;
+    const { password } = req.body;
 
-    if (!username || !password) {
+    if (!identifier || !password) {
       return res.status(400).json({ message: 'Admin username and password are required.' });
     }
 
-    const cleanIdentifier = String(username).trim().toLowerCase();
+    const cleanIdentifier = String(identifier).trim().toLowerCase();
 
     // Brute-force rate limiting
     const rateCheck = checkRateLimit(`admin-login:${cleanIdentifier}`, 5, 15 * 60 * 1000);
@@ -424,6 +427,7 @@ router.post('/2fa/verify', async (req, res) => {
     return res.json({
       message: 'Two-factor authentication verified successfully',
       token,
+      accessToken: token,
       user: {
         id: user.id,
         username: user.username,

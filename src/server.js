@@ -75,6 +75,17 @@ app.use('/api/parent', parentRoutes);
 app.use('/api/accountant', accountantRoutes);
 app.use('/api/customer', customerRoutes);
 
+// Mobile App & Legacy Compatibility Route Aliases
+app.use('/auth', authRoutes);
+app.post('/auth/2fa-verify', (req, res, next) => {
+  req.url = '/2fa/verify';
+  authRoutes(req, res, next);
+});
+app.use('/orders', (req, res, next) => {
+  req.url = req.url === '/' ? '/orders' : req.url.startsWith('/orders') ? req.url : '/orders' + req.url;
+  customerRoutes(req, res, next);
+});
+
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error('[UNHANDLED ERROR]', err);
