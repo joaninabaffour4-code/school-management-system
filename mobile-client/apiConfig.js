@@ -11,7 +11,7 @@ import { Platform } from 'react-native';
 
 export const LOCAL_WIFI_IP = '172.25.157.111';
 export const PORT = 3000;
-export const PUBLIC_HTTPS_URL = 'https://d1da3cebc3f3bb.lhr.life';
+export const PUBLIC_HTTPS_URL = 'https://8a81205a02cf57c6-196-61-37-205.serveousercontent.com';
 
 export function getDefaultServerUrl() {
   // Use live public HTTPS URL so it works seamlessly from anywhere in the world!
