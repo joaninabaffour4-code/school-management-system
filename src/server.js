@@ -22,6 +22,30 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Enable CORS for mobile app (Expo) and external clients
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+// Serverless pre-parsed body bypass: if runtime (e.g. Vercel) already consumed the stream, mark it read
+app.use((req, res, next) => {
+  if (req.body !== undefined && req.body !== null) {
+    if (typeof req.body === 'string' && req.headers['content-type']?.includes('application/json')) {
+      try {
+        req.body = JSON.parse(req.body);
+      } catch (e) {}
+    }
+    req._body = true;
+  }
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '..', 'public')));

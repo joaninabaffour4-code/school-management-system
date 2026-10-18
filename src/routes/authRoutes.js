@@ -46,8 +46,15 @@ router.post('/register', async (req, res) => {
     }
 
     // Role check: Only Student or Parent/Guardian allowed for public registration
+    const roleNormalize = {
+      student: 'Student',
+      parent: 'Parent/Guardian',
+      'parent/guardian': 'Parent/Guardian',
+      guardian: 'Parent/Guardian',
+    };
+    const cleanRole = roleNormalize[String(role).trim().toLowerCase()] || role;
     const allowedPublicRoles = ['Student', 'Parent/Guardian'];
-    if (!allowedPublicRoles.includes(role)) {
+    if (!allowedPublicRoles.includes(cleanRole)) {
       return res.status(403).json({
         message: 'Public registration is only available for Students and Parents. Teachers and Administrators must be provisioned.',
       });
@@ -65,7 +72,7 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ message: 'An account with this email address already exists.' });
     }
 
-    const roleRecord = await get('SELECT id FROM roles WHERE name = ?', [role]);
+    const roleRecord = await get('SELECT id FROM roles WHERE name = ?', [cleanRole]);
     if (!roleRecord) {
       return res.status(400).json({ message: 'Invalid role specified.' });
     }
@@ -87,16 +94,16 @@ router.post('/register', async (req, res) => {
     const userId = userResult.id;
 
     // Create role-specific profile row
-    if (role === 'Student') {
+    if (cleanRole === 'Student') {
       const admissionNumber = `STU-${new Date().getFullYear()}-${String(userId).padStart(4, '0')}`;
       await run('INSERT INTO students (user_id, admission_number) VALUES (?, ?)', [userId, admissionNumber]);
-    } else if (role === 'Parent/Guardian') {
+    } else if (cleanRole === 'Parent/Guardian') {
       await run('INSERT INTO guardians (user_id, emergency_phone) VALUES (?, ?)', [userId, phone || null]);
     }
 
     // Dispatch verification email
     await sendVerificationEmail(cleanEmail, cleanUsername, verificationToken);
-    await recordAuditLog(userId, 'REGISTER', 'users', userId, { role, email: cleanEmail });
+    await recordAuditLog(userId, 'REGISTER', 'users', userId, { role: cleanRole, email: cleanEmail });
 
     const hostHeader = req.headers['x-forwarded-host'] || req.headers.host;
     const protoHeader = req.headers['x-forwarded-proto'] || req.protocol || 'https';

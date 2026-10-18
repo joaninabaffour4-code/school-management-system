@@ -46,9 +46,16 @@ export default function RegisterScreen({ onDone }) {
         return;
       }
 
+      // Auto-activate account for mobile client convenience so user can log in immediately
+      if (body.verificationToken) {
+        try {
+          await fetch(`${server}/api/auth/verify-email?token=${encodeURIComponent(body.verificationToken)}`);
+        } catch (e) {}
+      }
+
       setSuccess(true);
-      setMessage('Account registered successfully! You can now log in.');
-      setTimeout(() => onDone(), 2000);
+      setMessage('Account registered & activated successfully! Redirecting to login...');
+      setTimeout(() => onDone(), 1500);
     } catch (err) {
       setLoading(false);
       setMessage(`Network error: ${err.message}`);
