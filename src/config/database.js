@@ -17,10 +17,15 @@ if (process.env.VERCEL) {
       fs.mkdirSync(tmpDir, { recursive: true });
     }
   } catch (e) {}
-  const tmpDbPath = path.join(tmpDir, 'bajonas_closet.db');
+  const seedDbPath = path.join(__dirname, '..', '..', 'data', 'seeds', 'school_system_seed.db');
   try {
-    if (!fs.existsSync(tmpDbPath) && fs.existsSync(defaultDbPath)) {
-      fs.copyFileSync(defaultDbPath, tmpDbPath);
+    if (!fs.existsSync(tmpDbPath)) {
+      if (fs.existsSync(seedDbPath)) {
+        fs.copyFileSync(seedDbPath, tmpDbPath);
+        console.log('[DB] Initialized /tmp DB from seedDbPath');
+      } else if (fs.existsSync(defaultDbPath)) {
+        fs.copyFileSync(defaultDbPath, tmpDbPath);
+      }
     }
   } catch (e) {
     console.warn('[DB] Vercel /tmp copy note:', e.message);
@@ -36,11 +41,20 @@ const db = new sqlite3.Database(dbPath, (err) => {
   }
 });
 
+import { scheduleS3Sync } from '../utils/s3Sync.js';
+
 export const run = (sql, params = []) =>
   new Promise((resolve, reject) => {
     db.run(sql, params, function (err) {
-      if (err) reject(err);
-      else resolve({ id: this.lastID, changes: this.changes });
+      if (err) {
+        reject(err);
+      } else {
+        const isWrite = /^\s*(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)/i.test(sql);
+        if (isWrite && process.env.VERCEL) {
+          scheduleS3Sync();
+        }
+        resolve({ id: this.lastID, changes: this.changes });
+      }
     });
   });
 

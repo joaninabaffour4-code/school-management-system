@@ -241,6 +241,13 @@
             </div>`
           : '';
 
+        // Auto-activate in background for seamless login experience
+        if (data.verificationToken) {
+          try {
+            await fetch('/api/auth/verify-email?token=' + encodeURIComponent(data.verificationToken));
+          } catch (e) {}
+        }
+
         alertBox.innerHTML = `<strong>Registration Successful!</strong><br>${data.message}${verifyBtnHtml}<br><br><a href="/login" style="color: #166534; font-weight: bold; text-decoration: underline;">Go to Login Page</a>`;
         alertBox.style.display = 'block';
       } catch (err) {

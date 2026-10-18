@@ -38,18 +38,22 @@ export default async function handler(req, res) {
     }
 
     const { default: app } = await import('../src/server.js');
-    const { setupDatabase } = await import('../src/setupDatabase.js');
-    const { seedAcademicData } = await import('../src/seed.js');
+    const { downloadDbFromS3, waitForPendingSync } = await import('../src/utils/s3Sync.js');
 
-    // Ensure database setup & initial seed run reliably
+    // Ensure database is restored from S3 or initialized & seeded reliably
     if (!global.__db_initialized) {
       if (!global.__db_init_promise) {
         global.__db_init_promise = (async () => {
           try {
-            await setupDatabase();
-            await seedAcademicData();
+            const downloaded = await downloadDbFromS3();
+            if (!downloaded) {
+              const { setupDatabase } = await import('../src/setupDatabase.js');
+              const { seedAcademicData } = await import('../src/seed.js');
+              await setupDatabase();
+              await seedAcademicData();
+            }
             global.__db_initialized = true;
-            console.log('[Serverless DB]: Initialized and seeded successfully');
+            console.log('[Serverless DB]: Persistent DB initialized successfully');
           } catch (dbErr) {
             global.__db_init_promise = null; // Allow retry on failure
             throw dbErr;
@@ -76,13 +80,19 @@ export default async function handler(req, res) {
 
     // Wrap Express invocation in a Promise so Vercel Serverless awaits HTTP response completion
     return new Promise((resolve) => {
-      res.on('finish', resolve);
-      res.on('close', resolve);
+      const finishAndResolve = async () => {
+        try {
+          await waitForPendingSync();
+        } catch (e) {}
+        resolve();
+      };
+      res.on('finish', finishAndResolve);
+      res.on('close', finishAndResolve);
       app(req, res, (err) => {
         if (err && !res.headersSent) {
           res.status(500).json({ error: 'Express Handler Error', message: err.message });
         }
-        resolve();
+        finishAndResolve();
       });
     });
   } catch (err) {
