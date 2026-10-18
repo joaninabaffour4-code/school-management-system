@@ -1,6 +1,13 @@
 export default async function handler(req, res) {
   try {
-    // Dynamic import to catch any module load or sqlite3 native binary failure
+    if (req.url === '/api/ping' || req.url === '/ping') {
+      return res.status(200).json({
+        status: 'pong',
+        url: req.url,
+        matchedPath: req.headers['x-matched-path'],
+      });
+    }
+
     const { default: app } = await import('../src/server.js');
     const { setupDatabase } = await import('../src/setupDatabase.js');
     const { seedAcademicData } = await import('../src/seed.js');
@@ -13,6 +20,11 @@ export default async function handler(req, res) {
       } catch (dbErr) {
         console.warn('[DB Init Note]:', dbErr.message);
       }
+    }
+
+    // If request was rewritten from a subpath or root
+    if (req.headers['x-matched-path'] && !req.url.startsWith('/api')) {
+      req.url = req.headers['x-matched-path'];
     }
 
     return app(req, res);
