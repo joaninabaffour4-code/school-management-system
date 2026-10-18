@@ -9,7 +9,7 @@
 
 import { Platform } from 'react-native';
 
-export const LOCAL_WIFI_IP = '192.168.137.183';
+export const LOCAL_WIFI_IP = '10.199.143.111';
 export const PORT = 3000;
 export const PUBLIC_HTTPS_URL = 'https://school-management-system-theta-cyan.vercel.app';
 
