@@ -11,7 +11,7 @@ import { Platform } from 'react-native';
 
 export const LOCAL_WIFI_IP = '172.25.157.111';
 export const PORT = 3000;
-export const PUBLIC_HTTPS_URL = 'https://onbtk-154-161-57-163.free.pinggy.net';
+export const PUBLIC_HTTPS_URL = 'https://school-management-system-theta-cyan.vercel.app';
 
 export function getDefaultServerUrl() {
   // Use live public HTTPS URL so it works seamlessly from anywhere in the world!
