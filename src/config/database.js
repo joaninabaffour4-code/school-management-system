@@ -11,15 +11,21 @@ let dbPath = process.env.DB_FILE || defaultDbPath;
 
 // Support Vercel serverless environment (writable /tmp sandbox)
 if (process.env.VERCEL) {
-  const tmpDbPath = path.join('/tmp', 'bajonas_closet.db');
+  const tmpDir = '/tmp';
+  try {
+    if (!fs.existsSync(tmpDir)) {
+      fs.mkdirSync(tmpDir, { recursive: true });
+    }
+  } catch (e) {}
+  const tmpDbPath = path.join(tmpDir, 'bajonas_closet.db');
   try {
     if (!fs.existsSync(tmpDbPath) && fs.existsSync(defaultDbPath)) {
       fs.copyFileSync(defaultDbPath, tmpDbPath);
     }
-    dbPath = tmpDbPath;
   } catch (e) {
     console.warn('[DB] Vercel /tmp copy note:', e.message);
   }
+  dbPath = tmpDbPath;
 }
 
 const db = new sqlite3.Database(dbPath, (err) => {

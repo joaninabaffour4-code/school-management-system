@@ -14,10 +14,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const dbSourcePath = path.join(__dirname, '..', '..', 'data', 'bajonas_closet.db');
-const localBackupDir = path.join(__dirname, '..', '..', 'data', 'backups');
+const localBackupDir = process.env.VERCEL
+  ? path.join('/tmp', 'backups')
+  : path.join(__dirname, '..', '..', 'data', 'backups');
 
-if (!fs.existsSync(localBackupDir)) {
-  fs.mkdirSync(localBackupDir, { recursive: true });
+try {
+  if (!fs.existsSync(localBackupDir)) {
+    fs.mkdirSync(localBackupDir, { recursive: true });
+  }
+} catch (e) {
+  console.warn('[BACKUP] Notice on backup directory creation:', e.message);
 }
 
 const s3Region = process.env.AWS_REGION || 'us-east-1';
