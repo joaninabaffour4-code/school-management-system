@@ -17,6 +17,7 @@ if (process.env.VERCEL) {
       fs.mkdirSync(tmpDir, { recursive: true });
     }
   } catch (e) {}
+  const tmpDbPath = path.join(tmpDir, 'bajonas_closet.db');
   const seedDbPath = path.join(__dirname, '..', '..', 'data', 'seeds', 'school_system_seed.db');
   try {
     if (!fs.existsSync(tmpDbPath)) {
