@@ -1,25 +1,18 @@
 {
   "version": 2,
   "cleanUrls": true,
-  "functions": {
-    "api/index.js": {
-      "includeFiles": "public/**",
-      "memory": 1024,
-      "maxDuration": 15
-    }
-  },
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/health",
-      "destination": "/api/index.js"
+      "source": "/",
+      "destination": "/index.html"
     },
     {
       "source": "/login",
       "destination": "/login.html"
+    },
+    {
+      "source": "/admin/login",
+      "destination": "/admin-login.html"
     },
     {
       "source": "/register",
@@ -38,10 +31,6 @@
       "destination": "/reset-password.html"
     },
     {
-      "source": "/admin/login",
-      "destination": "/admin-login.html"
-    },
-    {
       "source": "/admin/dashboard",
       "destination": "/admin-dashboard.html"
     },
@@ -58,8 +47,12 @@
       "destination": "/parent-dashboard.html"
     },
     {
-      "source": "/(.*)",
-      "destination": "/api/index.js"
+      "source": "/health",
+      "destination": "/api"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api"
     }
   ]
 }
