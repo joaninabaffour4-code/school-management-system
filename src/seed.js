@@ -16,36 +16,24 @@ export async function seedAcademicData() {
   const parentRole = await get("SELECT id FROM roles WHERE name = 'Parent/Guardian'");
 
   // 2. Academic Year
+  await run(
+    "INSERT OR IGNORE INTO academic_years (name, start_date, end_date, is_current) VALUES ('2026/2027', '2026-09-01', '2027-06-30', 1)"
+  );
   let year = await get("SELECT id FROM academic_years WHERE name = '2026/2027'");
-  if (!year) {
-    const res = await run(
-      "INSERT INTO academic_years (name, start_date, end_date, is_current) VALUES ('2026/2027', '2026-09-01', '2027-06-30', 1)"
-    );
-    year = { id: res.id };
-  }
 
   // Terms
+  await run(
+    "INSERT OR IGNORE INTO terms (academic_year_id, name, start_date, end_date, is_current) VALUES (?, 'Term 1', '2026-09-01', '2026-12-15', 1)",
+    [year.id]
+  );
   let term1 = await get("SELECT id FROM terms WHERE name = 'Term 1' AND academic_year_id = ?", [year.id]);
-  if (!term1) {
-    const res = await run(
-      "INSERT INTO terms (academic_year_id, name, start_date, end_date, is_current) VALUES (?, 'Term 1', '2026-09-01', '2026-12-15', 1)",
-      [year.id]
-    );
-    term1 = { id: res.id };
-  }
 
   // 3. Classes
+  await run("INSERT OR IGNORE INTO classes (name, grade_level, capacity) VALUES ('Grade 10A', '10', 35)");
   let class10A = await get("SELECT id FROM classes WHERE name = 'Grade 10A'");
-  if (!class10A) {
-    const res = await run("INSERT INTO classes (name, grade_level, capacity) VALUES ('Grade 10A', '10', 35)");
-    class10A = { id: res.id };
-  }
 
+  await run("INSERT OR IGNORE INTO classes (name, grade_level, capacity) VALUES ('Grade 11 Science', '11', 30)");
   let class11Sci = await get("SELECT id FROM classes WHERE name = 'Grade 11 Science'");
-  if (!class11Sci) {
-    const res = await run("INSERT INTO classes (name, grade_level, capacity) VALUES ('Grade 11 Science', '11', 30)");
-    class11Sci = { id: res.id };
-  }
 
   // 4. Subjects
   const subjectsToSeed = [
@@ -57,11 +45,8 @@ export async function seedAcademicData() {
 
   const subjectMap = {};
   for (const s of subjectsToSeed) {
+    await run('INSERT OR IGNORE INTO subjects (name, code) VALUES (?, ?)', [s.name, s.code]);
     let sub = await get('SELECT id FROM subjects WHERE code = ?', [s.code]);
-    if (!sub) {
-      const res = await run('INSERT INTO subjects (name, code) VALUES (?, ?)', [s.name, s.code]);
-      sub = { id: res.id };
-    }
     subjectMap[s.code] = sub.id;
   }
 
@@ -391,7 +376,9 @@ export async function seedAcademicData() {
   console.log('Seeding completed successfully!');
 }
 
-seedAcademicData().catch((err) => {
-  console.error('Seeding error:', err);
-  process.exit(1);
-});
+if (process.argv[1] && process.argv[1].endsWith('seed.js')) {
+  seedAcademicData().catch((err) => {
+    console.error('Seeding error:', err);
+    process.exit(1);
+  });
+}
