@@ -17,7 +17,11 @@ export default function OrdersScreen({ user, accessToken, onLogout }) {
     const headers = { Authorization: `Bearer ${accessToken}` };
 
     try {
-      if (role === 'Student') {
+      if (role === 'Administrator' || role === 'admin') {
+        const statsRes = await fetch(`${serverUrl}/api/admin/stats`, { headers });
+        const stats = statsRes.ok ? await statsRes.json() : null;
+        setData({ stats });
+      } else if (role === 'Student') {
         const [attRes, grdRes] = await Promise.all([
           fetch(`${serverUrl}/api/student/attendance`, { headers }),
           fetch(`${serverUrl}/api/student/grades`, { headers }),
@@ -84,6 +88,31 @@ export default function OrdersScreen({ user, accessToken, onLogout }) {
           <Text style={styles.badgeText}>{role}</Text>
         </View>
       </View>
+
+      {/* Administrator View */}
+      {(role === 'Administrator' || role === 'admin') && data?.stats && (
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>🛡️ System Overview</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginVertical: 10 }}>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#1e3a8a' }}>{data.stats.totalUsers}</Text>
+              <Text style={{ fontSize: 12, color: '#64748b' }}>Total Users</Text>
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#10b981' }}>{data.stats.totalStudents}</Text>
+              <Text style={{ fontSize: 12, color: '#64748b' }}>Students</Text>
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#f59e0b' }}>{data.stats.totalTeachers}</Text>
+              <Text style={{ fontSize: 12, color: '#64748b' }}>Teachers</Text>
+            </View>
+          </View>
+          <Text style={[styles.cardTitle, { marginTop: 14 }]}>☁️ Cloud Backup Status</Text>
+          <Text style={styles.itemSub}>
+            {data.stats.lastBackup ? `Latest S3 Backup: ${data.stats.lastBackup.filename} (${data.stats.lastBackup.status})` : 'AWS S3 Backup: Active (Scheduled)'}
+          </Text>
+        </View>
+      )}
 
       {/* Student View */}
       {role === 'Student' && data?.attendance && (
