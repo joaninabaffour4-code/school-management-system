@@ -1,11 +1,35 @@
 export default async function handler(req, res) {
   try {
-    if (req.url === '/api/ping' || req.url === '/ping') {
+    if (req.url.startsWith('/api/ping') || req.url === '/ping') {
       return res.status(200).json({
         status: 'pong',
         url: req.url,
-        matchedPath: req.headers['x-matched-path'],
+        argv: process.argv,
+        envVercel: process.env.VERCEL,
       });
+    }
+
+    if (req.url.startsWith('/api/debug')) {
+      const results = {};
+      try {
+        const dbModule = await import('../src/config/database.js');
+        results.database = 'imported';
+        const row = await dbModule.get('SELECT 1 as alive');
+        results.database_query = row;
+      } catch (e) {
+        results.database_error = e.message;
+        results.database_stack = e.stack;
+      }
+
+      try {
+        const serverModule = await import('../src/server.js');
+        results.server = 'imported';
+      } catch (e) {
+        results.server_error = e.message;
+        results.server_stack = e.stack;
+      }
+
+      return res.status(200).json(results);
     }
 
     const { default: app } = await import('../src/server.js');
@@ -22,7 +46,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // If request was rewritten from a subpath or root
+    // Normalizing URL for Express when invoked via Vercel rewrites
     if (req.headers['x-matched-path'] && !req.url.startsWith('/api')) {
       req.url = req.headers['x-matched-path'];
     }
