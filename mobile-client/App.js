@@ -47,7 +47,8 @@ export default function App() {
         <StatusBar barStyle="dark-content" />
         <TwoFAScreen
           tempToken={twoFactorTemp}
-          onSuccess={(token) => {
+          onSuccess={(token, verifiedUser) => {
+            if (verifiedUser) setUser(verifiedUser);
             setAccessToken(token);
             setTwoFactorTemp(null);
           }}

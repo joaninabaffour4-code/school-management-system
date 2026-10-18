@@ -1,4 +1,4 @@
-# Secure School Management System (BrightPath Academy)
+# Secure School Management System (Nina International)
 
 A secure, enterprise-grade academic School Management System built with **Node.js**, **Express**, **SQLite**, and **AWS Cloud Services**. Originating from a secure authentication and authorization architecture, this system enforces four distinct school roles (**Administrator**, **Teacher**, **Student**, and **Parent/Guardian**), **RFC 6238 TOTP Two-Factor Authentication**, **AES-256-GCM Authenticated Symmetric Encryption**, **Bcrypt Salt + Secret Pepper Password Security**, and **Automated Encrypted Database Backups to Amazon S3 with Disaster Recovery Restoration Testing**.
 

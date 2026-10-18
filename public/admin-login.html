@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Administrator Security Portal | BrightPath Academy</title>
+  <title>Administrator Security Portal | Nina International</title>
   <style>
     :root {
       --bg: #090d16;
@@ -171,7 +171,7 @@
 <body>
   <header>
     <div style="display: flex; align-items: center; gap: 10px;">
-      <strong>🛡️ Admin Security Gateway</strong>
+      <strong>🏫 Nina International &bull; 🛡️ Admin Gateway</strong>
       <span class="badge-secure">Tier 1 Clearance</span>
     </div>
     <div>
@@ -201,7 +201,12 @@
         </div>
 
         <div class="form-group" id="loginPwdGroup">
-          <label for="adminPassword">Master Password</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <label for="adminPassword" style="margin-bottom: 0;">Master Password</label>
+            <button type="button" onclick="togglePasswordVisibility('adminPassword', this)" style="background: #1f2937; border: 1px solid #374151; border-radius: 4px; padding: 2px 8px; font-size: 0.78rem; font-weight: 600; color: #9ca3af; cursor: pointer;">
+              👁️ View Password
+            </button>
+          </div>
           <input type="password" id="adminPassword" placeholder="••••••••" required />
         </div>
 
@@ -220,7 +225,12 @@
       <!-- Provisioning Panel (Protected by Setup Secret or Active Admin Token) -->
       <form id="adminProvisionForm" style="display: none;">
         <div class="form-group">
-          <label for="setupSecret">Bootstrap Authorization Secret</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <label for="setupSecret" style="margin-bottom: 0;">Bootstrap Authorization Secret</label>
+            <button type="button" onclick="togglePasswordVisibility('setupSecret', this)" style="background: #1f2937; border: 1px solid #374151; border-radius: 4px; padding: 2px 8px; font-size: 0.78rem; font-weight: 600; color: #9ca3af; cursor: pointer;">
+              👁️ View Secret
+            </button>
+          </div>
           <input type="password" id="setupSecret" placeholder="Enter ADMIN_SETUP_SECRET" required />
         </div>
         <div class="form-group">
@@ -240,7 +250,12 @@
           <input type="text" id="newAdminLast" placeholder="Last Name" required />
         </div>
         <div class="form-group">
-          <label for="newAdminPwd">Secure Master Password (min 8 chars)</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <label for="newAdminPwd" style="margin-bottom: 0;">Secure Master Password (min 8 chars)</label>
+            <button type="button" onclick="togglePasswordVisibility('newAdminPwd', this)" style="background: #1f2937; border: 1px solid #374151; border-radius: 4px; padding: 2px 8px; font-size: 0.78rem; font-weight: 600; color: #9ca3af; cursor: pointer;">
+              👁️ View Password
+            </button>
+          </div>
           <input type="password" id="newAdminPwd" placeholder="••••••••" required />
         </div>
 
@@ -399,10 +414,23 @@
         setTimeout(() => switchTab('login'), 2000);
       } catch (err) {
         provisionBtn.disabled = false;
-        provisionBtn.textContent = 'Provision Administrator Account';
         showAlert('Network error during provisioning.');
       }
     });
+
+    function togglePasswordVisibility(id, btn) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.type === 'password') {
+        el.type = 'text';
+        btn.textContent = '🙈 Hide';
+        btn.style.color = '#f59e0b';
+      } else {
+        el.type = 'password';
+        btn.textContent = '👁️ View Password';
+        btn.style.color = '#9ca3af';
+      }
+    }
   </script>
 </body>
 </html>

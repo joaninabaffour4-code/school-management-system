@@ -7,9 +7,9 @@ dotenv.config();
 
 const issuer = process.env.MFA_ISSUER || 'School Management System';
 
-// Configure TOTP window (1 step before/after = 30s tolerance for clock drift)
+// Configure TOTP window (2 steps before/after = 60s tolerance for device clock drift)
 authenticator.options = {
-  window: 1,
+  window: 2,
 };
 
 /**

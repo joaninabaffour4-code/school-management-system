@@ -12,6 +12,7 @@ export default function RegisterScreen({ onDone }) {
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function doRegister() {
     setMessage('');
@@ -64,7 +65,7 @@ export default function RegisterScreen({ onDone }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>🏫 Create Account</Text>
+      <Text style={styles.title}>🏫 Nina International</Text>
       <Text style={styles.subtitle}>Register as a Student or Parent/Guardian</Text>
 
       <Text style={styles.label}>First Name:</Text>
@@ -109,10 +110,17 @@ export default function RegisterScreen({ onDone }) {
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.label}>Password (min 8 chars):</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Text style={styles.label}>Password (min 8 chars):</Text>
+        <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
+          <Text style={{ fontSize: 13, color: '#1e3a8a', fontWeight: 'bold' }}>
+            {showPassword ? '🙈 Hide' : '👁️ View Password'}
+          </Text>
+        </TouchableOpacity>
+      </View>
       <TextInput
         placeholder="Password"
-        secureTextEntry
+        secureTextEntry={!showPassword}
         value={password}
         onChangeText={setPassword}
         style={styles.input}

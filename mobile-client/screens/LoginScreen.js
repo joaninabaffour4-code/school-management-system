@@ -8,6 +8,7 @@ export default function LoginScreen({ onLogin, onRegister }) {
   const [serverEndpoint, setServerEndpoint] = useState(getServerUrl());
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function doLogin() {
     setMessage('');
@@ -53,7 +54,7 @@ export default function LoginScreen({ onLogin, onRegister }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>🏫 School Management Mobile</Text>
+      <Text style={styles.title}>🏫 Nina International Mobile</Text>
       <Text style={styles.subtitle}>Log in using your account credentials</Text>
 
       <View style={styles.serverBox}>
@@ -91,10 +92,17 @@ export default function LoginScreen({ onLogin, onRegister }) {
         autoCorrect={false}
       />
 
-      <Text style={styles.label}>Password:</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Text style={styles.label}>Password:</Text>
+        <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
+          <Text style={{ fontSize: 13, color: '#1e3a8a', fontWeight: 'bold' }}>
+            {showPassword ? '🙈 Hide' : '👁️ View Password'}
+          </Text>
+        </TouchableOpacity>
+      </View>
       <TextInput
         placeholder="Password"
-        secureTextEntry
+        secureTextEntry={!showPassword}
         value={password}
         onChangeText={setPassword}
         style={styles.input}

@@ -13,7 +13,10 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbSourcePath = path.join(__dirname, '..', '..', 'data', 'bajonas_closet.db');
+const defaultDbPath = path.join(__dirname, '..', '..', 'data', 'bajonas_closet.db');
+const dbSourcePath = process.env.VERCEL
+  ? path.join('/tmp', 'bajonas_closet.db')
+  : (process.env.DB_FILE || defaultDbPath);
 const localBackupDir = process.env.VERCEL
   ? path.join('/tmp', 'backups')
   : path.join(__dirname, '..', '..', 'data', 'backups');
@@ -26,8 +29,8 @@ try {
   console.warn('[BACKUP] Notice on backup directory creation:', e.message);
 }
 
-const s3Region = process.env.AWS_REGION || 'us-east-1';
-const s3Bucket = process.env.AWS_S3_BACKUP_BUCKET || 'school-management-backups-2026';
+const s3Region = process.env.AWS_REGION || 'eu-north-1';
+const s3Bucket = process.env.AWS_S3_BACKUP_BUCKET || 'nina---backup';
 const retentionDays = Number(process.env.BACKUP_RETENTION_DAYS) || 30;
 
 let s3Client = null;
@@ -65,6 +68,13 @@ export async function runDatabaseBackup(triggerSource = 'scheduled_cron') {
 
   console.log(`[BACKUP] Starting automated backup (trigger: ${triggerSource})...`);
 
+  if (!fs.existsSync(dbSourcePath)) {
+    if (fs.existsSync(defaultDbPath)) {
+      try {
+        fs.copyFileSync(defaultDbPath, dbSourcePath);
+      } catch (e) {}
+    }
+  }
   if (!fs.existsSync(dbSourcePath)) {
     throw new Error(`Primary database file not found at ${dbSourcePath}`);
   }

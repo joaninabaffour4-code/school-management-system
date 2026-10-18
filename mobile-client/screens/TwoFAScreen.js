@@ -32,7 +32,7 @@ export default function TwoFAScreen({ tempToken, onSuccess, onCancel }) {
         return;
       }
 
-      onSuccess(body.token || body.accessToken);
+      onSuccess(body.token || body.accessToken, body.user);
     } catch (err) {
       setLoading(false);
       setMessage(`Connection Error: ${err.message}`);
