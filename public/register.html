@@ -223,12 +223,15 @@
 
         form.reset();
         alertBox.className = 'alert alert-success';
-        const verifyBtnHtml = data.verificationUrl
+        const verifyUrl = data.verificationToken
+          ? '/verify-email.html?token=' + encodeURIComponent(data.verificationToken)
+          : (data.verificationUrl || '#');
+        const verifyBtnHtml = (data.verificationToken || data.verificationUrl)
           ? `<div style="margin-top:12px;padding:12px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;text-align:left;">
               <strong style="color:#166534;">🎓 Demonstration / Quick Verification Link:</strong><br>
-              <span style="font-size:0.85rem;color:#374151;">Click below to verify this email immediately:</span><br>
-              <a href="${data.verificationUrl}" target="_blank" style="display:inline-block;margin-top:8px;padding:8px 14px;background:#15803d;color:#ffffff;border-radius:6px;text-decoration:none;font-weight:600;font-size:0.9rem;">
-                ✅ Verify Email Now
+              <span style="font-size:0.85rem;color:#374151;">Click below to activate and verify this account immediately:</span><br>
+              <a href="${verifyUrl}" target="_blank" style="display:inline-block;margin-top:8px;padding:8px 14px;background:#15803d;color:#ffffff;border-radius:6px;text-decoration:none;font-weight:600;font-size:0.9rem;">
+                ✅ Verify & Activate Account Now
               </a>
             </div>`
           : '';

@@ -68,8 +68,19 @@ export async function seedAcademicData() {
   // 5. Default Users for Each Role
   const defaultPassword = 'Password@123';
   const hashedDefaultPassword = await hashPassword(defaultPassword);
+  const adminPassword = 'Admin@123';
+  const hashedAdminPassword = await hashPassword(adminPassword);
 
   const sampleUsers = [
+    {
+      username: 'admin',
+      email: 'admin@school.edu',
+      first_name: 'System',
+      last_name: 'Administrator',
+      role_id: adminRole.id,
+      password_hash: hashedAdminPassword,
+      phone: '+233241000000',
+    },
     {
       username: 'teacher1',
       email: 'teacher1@school.edu',
@@ -121,12 +132,15 @@ export async function seedAcademicData() {
       const res = await run(
         `INSERT INTO users (username, email, password_hash, first_name, last_name, role_id, phone, is_email_verified, status)
          VALUES (?, ?, ?, ?, ?, ?, ?, 1, 'active')`,
-        [u.username, u.email, hashedDefaultPassword, u.first_name, u.last_name, u.role_id, u.phone]
+        [u.username, u.email, u.password_hash || hashedDefaultPassword, u.first_name, u.last_name, u.role_id, u.phone]
       );
       user = { id: res.id };
     } else {
       // Ensure email verified and active for testing
-      await run("UPDATE users SET is_email_verified = 1, status = 'active' WHERE id = ?", [user.id]);
+      await run("UPDATE users SET password_hash = ?, is_email_verified = 1, status = 'active' WHERE id = ?", [
+        u.password_hash || hashedDefaultPassword,
+        user.id,
+      ]);
     }
 
     // Role-specific records

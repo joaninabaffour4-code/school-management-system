@@ -98,7 +98,10 @@ router.post('/register', async (req, res) => {
     await sendVerificationEmail(cleanEmail, cleanUsername, verificationToken);
     await recordAuditLog(userId, 'REGISTER', 'users', userId, { role, email: cleanEmail });
 
-    const verificationUrl = `${process.env.APP_URL || 'http://localhost:3000'}/verify-email.html?token=${verificationToken}`;
+    const hostHeader = req.headers['x-forwarded-host'] || req.headers.host;
+    const protoHeader = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+    const dynamicBase = hostHeader ? `${protoHeader}://${hostHeader}` : (process.env.APP_URL || 'http://localhost:3000');
+    const verificationUrl = `${dynamicBase}/verify-email.html?token=${verificationToken}`;
 
     return res.status(201).json({
       message: 'Account registered successfully! A verification email has been dispatched. Please verify your email before logging in.',
@@ -111,7 +114,7 @@ router.post('/register', async (req, res) => {
     });
   } catch (error) {
     console.error('Registration error:', error);
-    return res.status(500).json({ message: 'Registration failed due to a server error.' });
+    return res.status(500).json({ message: 'Registration failed due to a server error.', error: error.message, stack: error.stack });
   }
 });
 
@@ -208,7 +211,7 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
-    return res.status(500).json({ message: 'Login failed due to a server error.' });
+    return res.status(500).json({ message: 'Login failed due to a server error.', error: error.message, stack: error.stack });
   }
 });
 
